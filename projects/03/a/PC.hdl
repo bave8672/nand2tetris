@@ -16,5 +16,21 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    Not(in=reset, out=notReset);
+    And(a=load, b=notReset, out=loadout);
+    Not(in=loadout, out=notLoad);
+    And(a=inc, b=notReset, out=incout0);
+    And(a=incout0, b=notLoad, out=incout);
+    Not(in=incout, out=notInc);
+    And(a=notLoad, b=notInc, out=notLoadAndNotInc);
+    And(a=notReset, b=notLoadAndNotInc, out=none);
+    Or(a=reset, b=loadout, out=loadOrReset);
+    Or(a=incout, b=loadout, out=loadOrInc);
+    Or(a=reset, b=incout, out=resetOrInc);
+    Or(a=resetOrInc, b=none, out=resetOrIncOrNone);
+    Or(a=incout, b=none, out=incOrNone);
+    ALU(x=rout, y=in, zx=loadOrReset, nx=loadOrInc, zy=resetOrIncOrNone, ny=incOrNone, f=resetOrInc, no=incout, out=aluOut);
+
+    Register(in=aluOut, load=true, out=rout);
+    Wire16(in=rout, out=out);
 }
