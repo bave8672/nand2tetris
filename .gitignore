@@ -3,3 +3,6 @@
 *.out
 *.pdf
 *.hack
+node_modules
+built
+*.asm.out
