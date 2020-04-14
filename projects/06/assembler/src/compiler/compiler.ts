@@ -57,7 +57,7 @@ enum CompMnm {
     DAndA = "D&A",
     DAndM = "D&M",
     DOrA = "D|A",
-    DOrM = "D&M",
+    DOrM = "D|M",
 }
 
 enum StoreMnm {
@@ -136,67 +136,73 @@ const IGNORED_LINE_PATTERN = /^\s*(\/\/.+)?$/; // Matches comments and whitespac
 const M_INSTRUCTION_PATTERN = /^\s*@(\S+)\s*(\/\/.+)?$/; // Matches e.g. "  @foo  " -> ["  @foo  ", "foo"]
 const ADDRESS_LITERAL_PATTERN = /^\d+$/; // Matches e.g. "123"
 const VARIABLE_NAME_PATTERN = /^[a-zA-Z][a-zA-Z\.\$\d_:]*$/;
-const LABEL_PATTERN = /^\s*\((\w+)\)\s*$/; // Matches e.g. "  (LOOP) " -> ["...", "LOOP"]
-const C_INSTRUCTION_PATTERN = /^\s*(([A-Z]+)\=)?([A-Z\+\-\d]+)(;(\w+))?\s*(\/\/.+)?$/;
+const LABEL_PATTERN = /^\s*\(([a-zA-Z][a-zA-Z\.\$\d_:]+)\)\s*$/; // Matches e.g. "  (LOOP) " -> ["...", "LOOP"]
+const C_INSTRUCTION_PATTERN = /^\s*(([A-Z]+)\=)?([A-Z\+\-\d\|\!&]+)(;(\w+))?\s*(\/\/.+)?$/;
 
 export class Compiler {
-    private sourceLineNumber = 1;
-    private instructionNumber = 0;
-    private nextSymbolAddress = 0x11;
-    private symbols: Map<string, Symbol> = new Map([
-        ["R0", { address: 0x0, name: "R0" }],
-        ["R1", { address: 0x1, name: "R1" }],
-        ["R2", { address: 0x10, name: "R2" }],
-        ["R3", { address: 0x11, name: "R3" }],
-        ["R4", { address: 0x100, name: "R4" }],
-        ["R5", { address: 0x101, name: "R5" }],
-        ["R6", { address: 0x110, name: "R6" }],
-        ["R7", { address: 0x111, name: "R7" }],
-        ["R8", { address: 0x1000, name: "R8" }],
-        ["R9", { address: 0x1001, name: "R9" }],
-        ["R10", { address: 0x1010, name: "R10" }],
-        ["R11", { address: 0x1011, name: "R11" }],
-        ["R12", { address: 0x1100, name: "R12" }],
-        ["R13", { address: 0x1101, name: "R13" }],
-        ["R14", { address: 0x1110, name: "R14" }],
-        ["R15", { address: 0x1111, name: "R15" }],
-        ["SP", { address: 0x0, name: "SP" }],
-        ["LCL", { address: 0x1, name: "LCL" }],
-        ["ARG", { address: 0x10, name: "ARG" }],
-        ["THIS", { address: 0x11, name: "THIS" }],
-        ["THAT", { address: 0x100, name: "THAT" }],
+    private nextSymbolAddress = 0x10;
+    private readonly symbols: Map<string, Symbol> = new Map([
+        ["R0", { address: 0, name: "R0" }],
+        ["R1", { address: 1, name: "R1" }],
+        ["R2", { address: 2, name: "R2" }],
+        ["R3", { address: 3, name: "R3" }],
+        ["R4", { address: 4, name: "R4" }],
+        ["R5", { address: 5, name: "R5" }],
+        ["R6", { address: 6, name: "R6" }],
+        ["R7", { address: 7, name: "R7" }],
+        ["R8", { address: 8, name: "R8" }],
+        ["R9", { address: 9, name: "R9" }],
+        ["R10", { address: 10, name: "R10" }],
+        ["R11", { address: 11, name: "R11" }],
+        ["R12", { address: 12, name: "R12" }],
+        ["R13", { address: 13, name: "R13" }],
+        ["R14", { address: 14, name: "R14" }],
+        ["R15", { address: 15, name: "R15" }],
+        ["SP", { address: 0, name: "SP" }],
+        ["LCL", { address: 1, name: "LCL" }],
+        ["ARG", { address: 2, name: "ARG" }],
+        ["THIS", { address: 3, name: "THIS" }],
+        ["THAT", { address: 4, name: "THAT" }],
         ["SCREEN", { address: 0x4000, name: "SCREEN" }],
         ["KBD", { address: 0x6000, name: "KBD" }],
     ]);
+    private readonly pass1: string[] = [];
+    private readonly instructions: Instruction[] = [];
 
     public async *compile(lines: AsyncIterable<string>): AsyncIterable<string> {
+        // 1st pass: remove labels
         for await (const line of lines) {
-            try {
-                const instruction = this.parseLine(line);
-                if (instruction) {
-                    yield this.emit(instruction);
-                    this.instructionNumber++;
-                }
-            } catch (err) {
-                throw new Error(`Line ${this.sourceLineNumber}: ${err}`);
+            if (IGNORED_LINE_PATTERN.test(line)) {
+                continue;
             }
-            this.sourceLineNumber++;
+            const labelTokens = LABEL_PATTERN.exec(line);
+            if (labelTokens) {
+                const [, symbolToken] = labelTokens;
+                this.buildToken(symbolToken);
+            } else {
+                this.pass1.push(line);
+            }
+        }
+
+        // 2nd pass: build instructions
+        for (const line of this.pass1) {
+            const instruction = this.parseLine(line);
+            if (instruction) {
+                this.instructions.push(instruction);
+            }
+        }
+
+        // 3rd pass: emit the binary hack code
+        for (const instruction of this.instructions) {
+            yield this.emit(instruction);
         }
     }
 
     private parseLine(line: string): Instruction | void {
-        if (IGNORED_LINE_PATTERN.test(line)) {
-            return;
-        }
         const mInstrTokens = M_INSTRUCTION_PATTERN.exec(line);
         if (mInstrTokens) {
             const [, addressToken] = mInstrTokens;
             return this.buildAInstruction(addressToken);
-        }
-        const labelTokens = LABEL_PATTERN.exec(line);
-        if (labelTokens) {
-            const [, symbolToken] = labelTokens;
-            return this.buildTokenInstruction(symbolToken);
         }
         const cInstrTokens = C_INSTRUCTION_PATTERN.exec(line);
         if (cInstrTokens) {
@@ -206,13 +212,8 @@ export class Compiler {
         throw new Error(`Unable to parse line ${line}`);
     }
 
-    private buildTokenInstruction(name: string): AInstruction {
-        const address = this.allocateSymbol(name);
-        address.address = this.instructionNumber + 1;
-        return {
-            type: InstructionType.A,
-            address,
-        };
+    private buildToken(name: string): void {
+        this.allocateSymbol(name, this.pass1.length);
     }
 
     private buildAInstruction(address: string): AInstruction {
@@ -235,7 +236,7 @@ export class Compiler {
             );
         } else if (!CompInstr.has(comp as CompMnm)) {
             throw new Error(
-                `Invalid cop value: ${comp}. Expected one of ${Array.from(
+                `Invalid cmp value: ${comp}. Expected one of ${Array.from(
                     CompInstr.keys()
                 )}`
             );
@@ -265,16 +266,24 @@ export class Compiler {
         throw new Error(`Expected address or variable, got ${address}`);
     }
 
-    private allocateSymbol(name: string): Symbol {
+    private allocateSymbol(name: string, address?: number): Symbol {
         let symbol = this.symbols.get(name);
         if (!symbol) {
-            // allocate a new symbol address
+            // allocate a new symbol address if necessary
             symbol = {
-                address: this.nextSymbolAddress,
                 name,
+                address: address ? address : this.nextSymbolAddress,
             };
             this.symbols.set(name, symbol);
-            this.nextSymbolAddress++;
+            if (!address) {
+                this.nextSymbolAddress++;
+            }
+        } else if (address) {
+            throw new Error(
+                `Cannot reallocate existing symbol ${JSON.stringify(
+                    symbol
+                )} to new address ${address}`
+            );
         }
         return symbol;
     }
