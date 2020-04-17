@@ -75,8 +75,9 @@ export class Compiler {
     }
 
     private static getBaseAddress(
-        segment: Omit<Segment, Segment.Constant>,
-        offset: number
+        segment: Omit<Segment, Segment.Constant | Segment.Static>,
+        offset: number,
+        fileName: string
     ): string {
         switch (segment) {
             case Segment.Argument:
@@ -91,6 +92,8 @@ export class Compiler {
                 return "THAT";
             case Segment.Temp:
                 return "R5";
+            case Segment.Static:
+                return `${fileName}.${offset}`;
             default:
                 throw new Error(
                     `Cannot get base address of segment ${segment}`
@@ -104,10 +107,15 @@ export class Compiler {
      */
     private static *selectMemory(
         segment: Omit<Segment, Segment.Constant>,
-        offset: number
+        offset: number,
+        fileName: string
     ): Iterable<string> {
-        const baseAddress = this.getBaseAddress(segment, offset);
+        const baseAddress = this.getBaseAddress(segment, offset, fileName);
         yield `@${baseAddress}\n`;
+        if (segment === Segment.Static) {
+            return;
+        }
+        // add the offset for non-static segments
         yield `D=M\n`;
         yield `@${offset}\n`;
         yield `A=D+A\n`; // A=baseAddress+index
@@ -118,13 +126,14 @@ export class Compiler {
      */
     private static *storeSegmentValueInD(
         segment: Segment,
-        index: number
+        index: number,
+        fileName: string
     ): Iterable<string> {
         if (segment === Segment.Constant) {
             yield `@${index}\n`;
             yield `D=A\n`;
         } else {
-            yield* this.selectMemory(segment, index);
+            yield* this.selectMemory(segment, index, fileName);
             yield `D=M\n`;
         }
     }
@@ -140,11 +149,16 @@ export class Compiler {
     }
 
     private static *emitMemoryAccessCommand(
-        command: MemoryAccessCommand
+        command: MemoryAccessCommand,
+        fileName: string
     ): Iterable<string> {
         if (command.type === MemoryAccessCommandType.Push) {
             // Store the memory value in D
-            yield* this.storeSegmentValueInD(command.segment, command.offset);
+            yield* this.storeSegmentValueInD(
+                command.segment,
+                command.offset,
+                fileName
+            );
             // Push the value onto the stack
             yield `@SP\n`;
             yield `A=M\n`;
@@ -157,42 +171,110 @@ export class Compiler {
             // Store the top of the stack's value in D
             yield `D=M\n`;
             // Pop the selected value into the selected segment
-            yield* this.selectMemory(command.segment, command.offset);
+            yield* this.selectMemory(command.segment, command.offset, fileName);
             yield `M=D\n`;
         }
     }
 
+    private static *jump(variable: string): Iterable<string> {
+        yield `@${variable}\n`;
+        yield `0;JMP\n`;
+    }
+
+    /**
+     * Writes true (-1) or false (0) to the head of the stack
+     * according to whether the value of the D register satisfies the given comparison to 0
+     */
+    private static *dPredicate(
+        condition: "LT" | "LE" | "EQ" | "GE" | "GT" | "NE",
+        commandId: number
+    ): Iterable<string> {
+        const $true = `${condition}.true.${commandId}`;
+        const $false = `${condition}.false.${commandId}`;
+        const $end = `${condition}.end.${commandId}`;
+        yield `@${$true}\n`;
+        yield `D;J${condition}\n`;
+        yield `(${$false})\n`;
+        yield `@SP\n`;
+        yield `M=0\n`;
+        yield* this.jump($end);
+        yield `(${$true})\n`;
+        yield `@SP\n`;
+        yield `M=-1\n`;
+        yield `(${$end})\n`;
+    }
+
     private static *emitArithmeticCommand(
-        command: ArithmeticCommand
+        command: ArithmeticCommand,
+        commandId: number
     ): Iterable<string> {
         // SP--
         yield* this.decrementStackPointer();
-        // Store y in D
-        yield `D=M\n`;
-        // SP--
-        yield* this.decrementStackPointer();
+        // D=y; M=x (common for methods with 2 arguments)
+        function* storeDecrementAndSelect(): Iterable<string> {
+            yield `A=M\n`; // Select M=RAM[SP]
+            yield `D=M\n`; // Store RAM[SP]
+            yield* Compiler.decrementStackPointer(); // SP--
+            yield `A=M\n`; // Select RAM[SP]
+        }
         if (command === ArithmeticCommand.Add) {
-            yield `M=M+D`;
+            yield* storeDecrementAndSelect();
+            yield `M=D+M\n`;
         } else if (command === ArithmeticCommand.Sub) {
-            yield `M=M-D`;
+            yield* storeDecrementAndSelect();
+            yield `M=M-D\n`;
         } else if (command === ArithmeticCommand.Neg) {
-            yield `M=-D`;
+            yield `A=M\n`; // M=y
+            yield `M=-M\n`;
+        } else if (command === ArithmeticCommand.Eq) {
+            yield* storeDecrementAndSelect();
+            yield `D=M-D\n`; // 0 if x==y
+            yield* this.dPredicate("EQ", commandId);
+        } else if (command === ArithmeticCommand.Gt) {
+            yield* storeDecrementAndSelect();
+            yield `D=M-D\n`;
+            yield* this.dPredicate("GT", commandId);
+        } else if (command === ArithmeticCommand.Lt) {
+            yield* storeDecrementAndSelect();
+            yield `D=M-D\n`;
+            yield* this.dPredicate("LT", commandId);
+        } else if (command === ArithmeticCommand.And) {
+            yield* storeDecrementAndSelect();
+            yield `M=D&M\n`;
+        } else if (command === ArithmeticCommand.Or) {
+            yield* storeDecrementAndSelect();
+            yield `M=D|M\n`;
+        } else if (command === ArithmeticCommand.Not) {
+            yield `A=M\n`; // M=y
+            yield `M=!M\n`;
         } else {
-            throw new Error(`TODO...`);
+            throw new Error(`Unhandled arithmetic command: ${command}`);
         }
     }
 
-    public async *compile(lines: AsyncIterable<string>): AsyncIterable<string> {
+    private commandId = 0;
+    private requestCommandId() {
+        return this.commandId++;
+    }
+
+    public async *compile(
+        lines: AsyncIterable<string>,
+        fileName: string
+    ): AsyncIterable<string> {
         for await (const line of lines) {
             const memoryAccessCommand = Compiler.parseMemoryAccessCommand(line);
             if (memoryAccessCommand) {
                 return yield* Compiler.emitMemoryAccessCommand(
-                    memoryAccessCommand
+                    memoryAccessCommand,
+                    fileName
                 );
             }
             const arithmeticCommand = Compiler.parseArithmeticCommand(line);
             if (arithmeticCommand) {
-                return yield* Compiler.emitArithmeticCommand(arithmeticCommand);
+                return yield* Compiler.emitArithmeticCommand(
+                    arithmeticCommand,
+                    this.requestCommandId()
+                );
             }
             throw new Error(`Unable to parse "${line}"`);
         }
