@@ -9,7 +9,10 @@ const fileIn = (yargs.argv.file || yargs.argv.in) as string;
 if (!fileIn) {
     throw new Error(`Please provide a .asm file input using --file or --in`);
 }
-const fileOut = (yargs.argv.out || `${fileIn}.out`) as string;
+const fileParts = fileIn.split(/[\.\/]/);
+const fileInRoot = fileParts[fileParts.length - 2];
+const fileOut = (yargs.argv.out ||
+    `${fileIn.replace(/\.[^\.]+$/, ".asm")}`) as string;
 
 async function main() {
     const fileStream = fs.createReadStream(fileIn);
@@ -20,10 +23,12 @@ async function main() {
     fs.writeFileSync(fileOut, "");
     const out = fs.createWriteStream(fileOut, { flags: "a" });
     const compiler = new Compiler();
-    for await (const line of compiler.compile(rl)) {
+    for await (const line of compiler.compile([
+        { lines: rl, name: fileInRoot },
+    ])) {
         out.write(line);
     }
-    console.log(`Built hack file ${fileOut} in ${clock(start)}ms`);
+    console.log(`Built asm file ${fileOut} in ${clock(start)}ms`);
 }
 
 function clock(): [number, number];
