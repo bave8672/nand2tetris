@@ -618,6 +618,15 @@ describe(`compiler`, () => {
         );
     });
 
+    it(`should translate a label command`, async () => {
+        await expectLines(
+            compiler.compile([
+                { lines: lines(`label LOOP`), name: "file_name" },
+            ]),
+            [...init, "(LOOP)\n"]
+        );
+    });
+
     async function* lines(...strs: string[]): AsyncIterable<string> {
         yield* strs;
     }

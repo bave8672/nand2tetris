@@ -24,6 +24,7 @@ const MEMORY_ACCESS_COMMAND_PATTERN = new RegExp(
 );
 const EMPTY_PATTERN = /^\s*$/;
 const COMMENT_PATTERN = /^\s*\/\/.*$/;
+const LABEL_PATTERN = /^\s*label (\w[\w\._\d]*)\s*$/;
 
 interface MemoryAccessCommand {
     type: MemoryAccessCommandType;
@@ -75,6 +76,15 @@ export class Compiler {
             return;
         }
         return tokens[1] as ArithmeticCommand;
+    }
+
+    private static parseLabelCommand(command: string): string | undefined {
+        const tokens = LABEL_PATTERN.exec(command);
+        if (!tokens) {
+            return;
+        }
+        const [, label] = tokens;
+        return label;
     }
 
     private static getBaseAddress(
@@ -259,6 +269,10 @@ export class Compiler {
         yield* this.incrementStackPointer();
     }
 
+    private static *emitLabelCommand(label: string): Iterable<string> {
+        yield `(${label})\n`;
+    }
+
     /**
      * Initialize the stack pointer
      */
@@ -305,6 +319,11 @@ export class Compiler {
                         arithmeticCommand,
                         this.requestCommandId()
                     );
+                    continue;
+                }
+                const label = Compiler.parseLabelCommand(line);
+                if (label) {
+                    yield* Compiler.emitLabelCommand(label);
                     continue;
                 }
                 throw new Error(`Unable to parse "${line}"`);
