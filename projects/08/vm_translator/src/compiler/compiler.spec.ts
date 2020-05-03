@@ -619,11 +619,39 @@ describe(`compiler`, () => {
     });
 
     it(`should translate a label command`, async () => {
+        (compiler as any).functionName = "MyFn";
         await expectLines(
             compiler.compile([
                 { lines: lines(`label LOOP`), name: "file_name" },
             ]),
-            [...init, "(LOOP)\n"]
+            [...init, "(file_name.MyFn$LOOP)\n"]
+        );
+    });
+
+    it(`should translate a goto command`, async () => {
+        (compiler as any).functionName = "MyFn";
+        await expectLines(
+            compiler.compile([
+                { lines: lines(`goto LOOP`), name: "file_name" },
+            ]),
+            [...init, "@file_name.MyFn$LOOP\n", "0;JMP\n"]
+        );
+    });
+
+    it(`should translate an if-goto command`, async () => {
+        (compiler as any).functionName = "MyFn";
+        await expectLines(
+            compiler.compile([
+                { lines: lines(`if-goto LOOP`), name: "file_name" },
+            ]),
+            [
+                ...init,
+                "@SP\n",
+                "AM=M-1\n",
+                "D=M\n",
+                "@file_name.MyFn$LOOP\n",
+                "D;JNE\n",
+            ]
         );
     });
 

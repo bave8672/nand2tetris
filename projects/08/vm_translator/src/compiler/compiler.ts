@@ -25,6 +25,8 @@ const MEMORY_ACCESS_COMMAND_PATTERN = new RegExp(
 const EMPTY_PATTERN = /^\s*$/;
 const COMMENT_PATTERN = /^\s*\/\/.*$/;
 const LABEL_PATTERN = /^\s*label (\w[\w\._\d]*)\s*$/;
+const GOTO_PATTERN = /^\s*goto (\w[\w\._\d]*)\s*$/;
+const IF_GOTO_PATTERN = /^\s*if-goto (\w[\w\._\d]*)\s*$/;
 
 interface MemoryAccessCommand {
     type: MemoryAccessCommandType;
@@ -52,8 +54,18 @@ const ARITHMETIC_COMMAND_PATTERN = new RegExp(
     `^${captureEnum(ArithmeticCommand)}$`
 );
 
+enum JumpMnm {
+    JLT = "JLT",
+    JLE = "JLE",
+    JEQ = "JEQ",
+    JGE = "JGE",
+    JGT = "JGT",
+    JNE = "JNE",
+    JMP = "JMP",
+}
+
 export class Compiler {
-    private static parseMemoryAccessCommand(
+    private parseMemoryAccessCommand(
         command: string
     ): MemoryAccessCommand | void {
         const tokens = MEMORY_ACCESS_COMMAND_PATTERN.exec(command);
@@ -68,9 +80,7 @@ export class Compiler {
         };
     }
 
-    private static parseArithmeticCommand(
-        command: string
-    ): ArithmeticCommand | void {
+    private parseArithmeticCommand(command: string): ArithmeticCommand | void {
         const tokens = ARITHMETIC_COMMAND_PATTERN.exec(command);
         if (!tokens) {
             return;
@@ -78,7 +88,7 @@ export class Compiler {
         return tokens[1] as ArithmeticCommand;
     }
 
-    private static parseLabelCommand(command: string): string | undefined {
+    private parseLabelCommand(command: string): string | undefined {
         const tokens = LABEL_PATTERN.exec(command);
         if (!tokens) {
             return;
@@ -87,7 +97,25 @@ export class Compiler {
         return label;
     }
 
-    private static getBaseAddress(
+    private parseGotoCommand(command: string): string | undefined {
+        const tokens = GOTO_PATTERN.exec(command);
+        if (!tokens) {
+            return;
+        }
+        const [, label] = tokens;
+        return label;
+    }
+
+    private parseIfGotoCommand(command: string): string | undefined {
+        const tokens = IF_GOTO_PATTERN.exec(command);
+        if (!tokens) {
+            return;
+        }
+        const [, label] = tokens;
+        return label;
+    }
+
+    private getBaseAddress(
         segment: Omit<Segment, Segment.Constant | Segment.Static>,
         offset: number,
         fileName: string
@@ -118,7 +146,7 @@ export class Compiler {
      * Sets the A register the memory address of segment[index]
      * Sets M to segment[index]
      */
-    private static *selectMemory(
+    private *selectMemory(
         segment: Omit<Segment, Segment.Constant>,
         offset: number,
         fileName: string
@@ -141,7 +169,7 @@ export class Compiler {
     /**
      * Stores the memory value at segment[index] in the D register
      */
-    private static *storeSegmentValueInD(
+    private *storeSegmentValueInD(
         segment: Segment,
         index: number,
         fileName: string
@@ -155,17 +183,17 @@ export class Compiler {
         }
     }
 
-    private static *incrementStackPointer(): Iterable<string> {
+    private *incrementStackPointer(): Iterable<string> {
         yield `@SP\n`;
         yield `AM=M+1\n`;
     }
 
-    private static *decrementStackPointer(): Iterable<string> {
+    private *decrementStackPointer(): Iterable<string> {
         yield `@SP\n`;
         yield `AM=M-1\n`;
     }
 
-    private static *emitMemoryAccessCommand(
+    private *emitMemoryAccessCommand(
         command: MemoryAccessCommand,
         fileName: string
     ): Iterable<string> {
@@ -193,9 +221,13 @@ export class Compiler {
         }
     }
 
-    private static *jump(variable: string): Iterable<string> {
+    private *jump(
+        variable: string,
+        comp: "0" | "D" = "0",
+        cond: JumpMnm = JumpMnm.JMP
+    ): Iterable<string> {
         yield `@${variable}\n`;
-        yield `0;JMP\n`;
+        yield `${comp};${cond}\n`;
     }
 
     /**
@@ -203,7 +235,7 @@ export class Compiler {
      * according to whether the value of the D register satisfies the given comparison to 0
      * then increments the stack pointer
      */
-    private static *dPredicate(
+    private *dPredicate(
         condition: "LT" | "LE" | "EQ" | "GE" | "GT" | "NE",
         commandId: number
     ): Iterable<string> {
@@ -224,16 +256,17 @@ export class Compiler {
         yield `(${$end})\n`;
     }
 
-    private static *emitArithmeticCommand(
+    private *emitArithmeticCommand(
         command: ArithmeticCommand,
         commandId: number
     ): Iterable<string> {
+        const compiler = this;
         // SP--
         yield* this.decrementStackPointer();
         // D=y; M=x (common for methods with 2 arguments)
         function* storeAndDecrement(): Iterable<string> {
             yield `D=M\n`; // Store RAM[SP]
-            yield* Compiler.decrementStackPointer(); // SP--
+            yield* compiler.decrementStackPointer(); // SP--
         }
         if (command === ArithmeticCommand.Add) {
             yield* storeAndDecrement();
@@ -269,20 +302,37 @@ export class Compiler {
         yield* this.incrementStackPointer();
     }
 
-    private static *emitLabelCommand(label: string): Iterable<string> {
-        yield `(${label})\n`;
+    private buildLabel(labelName: string): string {
+        return `${this.fileName}.${this.functionName}$${labelName}`;
+    }
+
+    private *emitLabelCommand(label: string): Iterable<string> {
+        yield `(${this.buildLabel(label)})\n`;
+    }
+
+    private *emitGotoCommand(label: string): Iterable<string> {
+        yield* this.jump(this.buildLabel(label));
+    }
+
+    private *emitIfGotoCommand(label: string): Iterable<string> {
+        yield* this.decrementStackPointer();
+        yield `D=M\n`;
+        yield* this.jump(this.buildLabel(label), "D", JumpMnm.JNE);
     }
 
     /**
      * Initialize the stack pointer
      */
-    private static *init(): Iterable<string> {
+    private *init(): Iterable<string> {
         yield `@256\n`;
         yield `D=A\n`;
         yield `@SP\n`;
         yield `A=D\n`;
     }
 
+    private fileName: string = "";
+    private lineNumber = 0;
+    private functionName: string = "";
     private commandId = 0;
     private requestCommandId() {
         return this.commandId++;
@@ -294,36 +344,45 @@ export class Compiler {
             name: string;
         }>
     ): AsyncIterable<string> {
-        yield* Compiler.init();
+        yield* this.init();
         for (const file of files) {
-            let lineNumber = 0;
+            this.fileName = file.name;
+            this.lineNumber = 0;
             for await (const line of file.lines) {
-                lineNumber++;
+                this.lineNumber++;
                 if (EMPTY_PATTERN.test(line) || COMMENT_PATTERN.test(line)) {
                     continue;
                 }
-                yield `// ${file.name}:${lineNumber} ${line}\n`;
-                const memoryAccessCommand = Compiler.parseMemoryAccessCommand(
-                    line
-                );
+                yield `// ${this.fileName}:${this.lineNumber} ${line}\n`;
+                const memoryAccessCommand = this.parseMemoryAccessCommand(line);
                 if (memoryAccessCommand) {
-                    yield* Compiler.emitMemoryAccessCommand(
+                    yield* this.emitMemoryAccessCommand(
                         memoryAccessCommand,
                         file.name
                     );
                     continue;
                 }
-                const arithmeticCommand = Compiler.parseArithmeticCommand(line);
+                const arithmeticCommand = this.parseArithmeticCommand(line);
                 if (arithmeticCommand) {
-                    yield* Compiler.emitArithmeticCommand(
+                    yield* this.emitArithmeticCommand(
                         arithmeticCommand,
                         this.requestCommandId()
                     );
                     continue;
                 }
-                const label = Compiler.parseLabelCommand(line);
+                const label = this.parseLabelCommand(line);
                 if (label) {
-                    yield* Compiler.emitLabelCommand(label);
+                    yield* this.emitLabelCommand(label);
+                    continue;
+                }
+                const gotoCommand = this.parseGotoCommand(line);
+                if (gotoCommand) {
+                    yield* this.emitGotoCommand(gotoCommand);
+                    continue;
+                }
+                const ifGotoCommand = this.parseIfGotoCommand(line);
+                if (ifGotoCommand) {
+                    yield* this.emitIfGotoCommand(ifGotoCommand);
                     continue;
                 }
                 throw new Error(`Unable to parse "${line}"`);
