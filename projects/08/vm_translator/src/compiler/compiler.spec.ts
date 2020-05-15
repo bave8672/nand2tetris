@@ -655,6 +655,49 @@ describe(`compiler`, () => {
         );
     });
 
+    it(`should translate a function command`, async () => {
+        (compiler as any).functionName = "MyFn";
+        await expectLines(
+            compiler.compile([
+                { lines: lines(`function foo 3`), name: "file_name" },
+            ]),
+            [
+                ...init,
+                "(file_name.foo)\n",
+                // Select
+                `@0\n`,
+                `D=A\n`,
+                // Push
+                `@SP\n`,
+                `A=M\n`,
+                `M=D\n`,
+                // SP++
+                `@SP\n`,
+                `AM=M+1\n`,
+                // Select
+                `@0\n`,
+                `D=A\n`,
+                // Push
+                `@SP\n`,
+                `A=M\n`,
+                `M=D\n`,
+                // SP++
+                `@SP\n`,
+                `AM=M+1\n`,
+                // Select
+                `@0\n`,
+                `D=A\n`,
+                // Push
+                `@SP\n`,
+                `A=M\n`,
+                `M=D\n`,
+                // SP++
+                `@SP\n`,
+                `AM=M+1\n`,
+            ]
+        );
+    });
+
     async function* lines(...strs: string[]): AsyncIterable<string> {
         yield* strs;
     }

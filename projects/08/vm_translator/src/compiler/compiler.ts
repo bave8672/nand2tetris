@@ -27,11 +27,17 @@ const COMMENT_PATTERN = /^\s*\/\/.*$/;
 const LABEL_PATTERN = /^\s*label (\w[\w\._\d]*)\s*$/;
 const GOTO_PATTERN = /^\s*goto (\w[\w\._\d]*)\s*$/;
 const IF_GOTO_PATTERN = /^\s*if-goto (\w[\w\._\d]*)\s*$/;
+const FUNCTION_PATTERN = /^\s*function (\w[\w\._\d]*) (\d+)\s*$/;
 
 interface MemoryAccessCommand {
     type: MemoryAccessCommandType;
     segment: Segment;
     offset: number;
+}
+
+interface FunctionCommand {
+    name: string;
+    locals: number;
 }
 
 const TRUE = 0xfff;
@@ -115,10 +121,21 @@ export class Compiler {
         return label;
     }
 
+    private parseFunctionCommand(command: string): FunctionCommand | undefined {
+        const tokens = FUNCTION_PATTERN.exec(command);
+        if (!tokens) {
+            return;
+        }
+        const [, name, locals] = tokens;
+        return {
+            name,
+            locals: Number.parseInt(locals),
+        };
+    }
+
     private getBaseAddress(
         segment: Omit<Segment, Segment.Constant | Segment.Static>,
-        offset: number,
-        fileName: string
+        offset: number
     ): string {
         switch (segment) {
             case Segment.Argument:
@@ -132,7 +149,7 @@ export class Compiler {
             case Segment.That:
                 return "THAT";
             case Segment.Static:
-                return `${fileName}.${offset}`;
+                return `${this.fileName}.${offset}`;
             case Segment.Temp:
                 return `${TMP + offset}`;
             default:
@@ -148,10 +165,9 @@ export class Compiler {
      */
     private *selectMemory(
         segment: Omit<Segment, Segment.Constant>,
-        offset: number,
-        fileName: string
+        offset: number
     ): Iterable<string> {
-        const baseAddress = this.getBaseAddress(segment, offset, fileName);
+        const baseAddress = this.getBaseAddress(segment, offset);
         yield `@${baseAddress}\n`;
         if (
             segment === Segment.Static ||
@@ -171,14 +187,13 @@ export class Compiler {
      */
     private *storeSegmentValueInD(
         segment: Segment,
-        index: number,
-        fileName: string
+        index: number
     ): Iterable<string> {
         if (segment === Segment.Constant) {
             yield `@${index}\n`;
             yield `D=A\n`;
         } else {
-            yield* this.selectMemory(segment, index, fileName);
+            yield* this.selectMemory(segment, index);
             yield `D=M\n`;
         }
     }
@@ -194,16 +209,11 @@ export class Compiler {
     }
 
     private *emitMemoryAccessCommand(
-        command: MemoryAccessCommand,
-        fileName: string
+        command: MemoryAccessCommand
     ): Iterable<string> {
         if (command.type === MemoryAccessCommandType.Push) {
             // Store the memory value in D
-            yield* this.storeSegmentValueInD(
-                command.segment,
-                command.offset,
-                fileName
-            );
+            yield* this.storeSegmentValueInD(command.segment, command.offset);
             // Push the value onto the stack
             yield `@SP\n`;
             yield `A=M\n`;
@@ -216,7 +226,7 @@ export class Compiler {
             // Store the top of the stack's value in D
             yield `D=M\n`;
             // Pop the selected value into the selected segment
-            yield* this.selectMemory(command.segment, command.offset, fileName);
+            yield* this.selectMemory(command.segment, command.offset);
             yield `M=D\n`;
         }
     }
@@ -302,8 +312,12 @@ export class Compiler {
         yield* this.incrementStackPointer();
     }
 
+    private buildFunctionLabel(functionName: string): string {
+        return `${this.fileName}.${functionName}`;
+    }
+
     private buildLabel(labelName: string): string {
-        return `${this.fileName}.${this.functionName}$${labelName}`;
+        return `${this.buildFunctionLabel(this.functionName)}$${labelName}`;
     }
 
     private *emitLabelCommand(label: string): Iterable<string> {
@@ -318,6 +332,18 @@ export class Compiler {
         yield* this.decrementStackPointer();
         yield `D=M\n`;
         yield* this.jump(this.buildLabel(label), "D", JumpMnm.JNE);
+    }
+
+    private *emitFunctionCommand(command: FunctionCommand): Iterable<string> {
+        yield `(${this.buildFunctionLabel(command.name)})\n`;
+        const pushCommand: MemoryAccessCommand = {
+            type: MemoryAccessCommandType.Push,
+            segment: Segment.Constant,
+            offset: 0,
+        };
+        for (let i = 0; i < command.locals; i++) {
+            yield* this.emitMemoryAccessCommand(pushCommand);
+        }
     }
 
     /**
@@ -356,10 +382,7 @@ export class Compiler {
                 yield `// ${this.fileName}:${this.lineNumber} ${line}\n`;
                 const memoryAccessCommand = this.parseMemoryAccessCommand(line);
                 if (memoryAccessCommand) {
-                    yield* this.emitMemoryAccessCommand(
-                        memoryAccessCommand,
-                        file.name
-                    );
+                    yield* this.emitMemoryAccessCommand(memoryAccessCommand);
                     continue;
                 }
                 const arithmeticCommand = this.parseArithmeticCommand(line);
@@ -383,6 +406,11 @@ export class Compiler {
                 const ifGotoCommand = this.parseIfGotoCommand(line);
                 if (ifGotoCommand) {
                     yield* this.emitIfGotoCommand(ifGotoCommand);
+                    continue;
+                }
+                const functionCommand = this.parseFunctionCommand(line);
+                if (functionCommand) {
+                    yield* this.emitFunctionCommand(functionCommand);
                     continue;
                 }
                 throw new Error(`Unable to parse "${line}"`);
