@@ -28,6 +28,7 @@ const LABEL_PATTERN = /^\s*label (\w[\w\._\d]*)\s*$/;
 const GOTO_PATTERN = /^\s*goto (\w[\w\._\d]*)\s*$/;
 const IF_GOTO_PATTERN = /^\s*if-goto (\w[\w\._\d]*)\s*$/;
 const FUNCTION_PATTERN = /^\s*function (\w[\w\._\d]*) (\d+)\s*$/;
+const CALL_PATTERN = /^\s*call (\w[\w\._\d]*) (\d+)\s*$/;
 
 interface MemoryAccessCommand {
     type: MemoryAccessCommandType;
@@ -38,6 +39,11 @@ interface MemoryAccessCommand {
 interface FunctionCommand {
     name: string;
     locals: number;
+}
+
+interface CallCommand {
+    name: string;
+    arguments: number;
 }
 
 const TRUE = 0xfff;
@@ -133,6 +139,18 @@ export class Compiler {
         };
     }
 
+    private parseCallCommand(command: string): CallCommand | undefined {
+        const tokens = CALL_PATTERN.exec(command);
+        if (!tokens) {
+            return;
+        }
+        const [, name, args] = tokens;
+        return {
+            name,
+            arguments: Number.parseInt(args),
+        };
+    }
+
     private getBaseAddress(
         segment: Omit<Segment, Segment.Constant | Segment.Static>,
         offset: number
@@ -176,10 +194,14 @@ export class Compiler {
         ) {
             return;
         }
-        // add the offset for non-static segments
-        yield `D=M\n`;
-        yield `@${offset}\n`;
-        yield `A=D+A\n`; // A=baseAddress+index
+        if (offset === 0) {
+            yield `A=M\n`;
+        } else {
+            // add the offset for non-static segments
+            yield `D=M\n`;
+            yield `@${offset}\n`;
+            yield `A=D+A\n`; // A=baseAddress+index
+        }
     }
 
     /**
@@ -187,13 +209,13 @@ export class Compiler {
      */
     private *storeSegmentValueInD(
         segment: Segment,
-        index: number
+        offset: number
     ): Iterable<string> {
         if (segment === Segment.Constant) {
-            yield `@${index}\n`;
+            yield `@${offset}\n`;
             yield `D=A\n`;
         } else {
-            yield* this.selectMemory(segment, index);
+            yield* this.selectMemory(segment, offset);
             yield `D=M\n`;
         }
     }
@@ -208,6 +230,15 @@ export class Compiler {
         yield `AM=M-1\n`;
     }
 
+    private *pushDOntoStack(): Iterable<string> {
+        // Push the value onto the stack
+        yield `@SP\n`;
+        yield `A=M\n`;
+        yield `M=D\n`;
+        // SP++
+        yield* this.incrementStackPointer();
+    }
+
     private *emitMemoryAccessCommand(
         command: MemoryAccessCommand
     ): Iterable<string> {
@@ -215,11 +246,7 @@ export class Compiler {
             // Store the memory value in D
             yield* this.storeSegmentValueInD(command.segment, command.offset);
             // Push the value onto the stack
-            yield `@SP\n`;
-            yield `A=M\n`;
-            yield `M=D\n`;
-            // SP++
-            yield* this.incrementStackPointer();
+            yield* this.pushDOntoStack();
         } else {
             // SP--
             yield* this.decrementStackPointer();
@@ -246,9 +273,9 @@ export class Compiler {
      * then increments the stack pointer
      */
     private *dPredicate(
-        condition: "LT" | "LE" | "EQ" | "GE" | "GT" | "NE",
-        commandId: number
+        condition: "LT" | "LE" | "EQ" | "GE" | "GT" | "NE"
     ): Iterable<string> {
+        const commandId = this.commandId++;
         const $true = `${condition}.${commandId}.true`;
         const $false = `${condition}.${commandId}.false`;
         const $end = `${condition}.${commandId}.end`;
@@ -267,8 +294,7 @@ export class Compiler {
     }
 
     private *emitArithmeticCommand(
-        command: ArithmeticCommand,
-        commandId: number
+        command: ArithmeticCommand
     ): Iterable<string> {
         const compiler = this;
         // SP--
@@ -289,15 +315,15 @@ export class Compiler {
         } else if (command === ArithmeticCommand.Eq) {
             yield* storeAndDecrement();
             yield `D=M-D\n`; // 0 if x==y
-            yield* this.dPredicate("EQ", commandId);
+            yield* this.dPredicate("EQ");
         } else if (command === ArithmeticCommand.Gt) {
             yield* storeAndDecrement();
             yield `D=M-D\n`;
-            yield* this.dPredicate("GT", commandId);
+            yield* this.dPredicate("GT");
         } else if (command === ArithmeticCommand.Lt) {
             yield* storeAndDecrement();
             yield `D=M-D\n`;
-            yield* this.dPredicate("LT", commandId);
+            yield* this.dPredicate("LT");
         } else if (command === ArithmeticCommand.And) {
             yield* storeAndDecrement();
             yield `M=D&M\n`;
@@ -335,7 +361,9 @@ export class Compiler {
     }
 
     private *emitFunctionCommand(command: FunctionCommand): Iterable<string> {
+        // (f)
         yield `(${this.buildFunctionLabel(command.name)})\n`;
+        // initialise k local variables to 0
         const pushCommand: MemoryAccessCommand = {
             type: MemoryAccessCommandType.Push,
             segment: Segment.Constant,
@@ -344,6 +372,50 @@ export class Compiler {
         for (let i = 0; i < command.locals; i++) {
             yield* this.emitMemoryAccessCommand(pushCommand);
         }
+    }
+
+    private *pushVariable(variable: string): Iterable<string> {
+        yield* this.emitMemoryAccessCommand({
+            type: MemoryAccessCommandType.Push,
+            segment: Segment.Constant,
+            offset: variable as any, // todo: typings - allow variable string for constant push
+        });
+    }
+
+    private *pushSegmentPointer(segment: Segment): Iterable<string> {
+        yield `@${this.getBaseAddress(segment, 0)}\n`;
+        yield `D=M\n`;
+        yield* this.pushDOntoStack();
+    }
+
+    private *emitCallCommand(command: CallCommand): Iterable<string> {
+        const returnAddress = `return-address.${this.callId++}`;
+        // push return-address
+        yield* this.pushVariable(returnAddress);
+        // push LCL
+        yield* this.pushSegmentPointer(Segment.Local);
+        // push ARG
+        yield* this.pushSegmentPointer(Segment.Argument);
+        // push THIS
+        yield* this.pushSegmentPointer(Segment.This);
+        // push THAT
+        yield* this.pushSegmentPointer(Segment.That);
+        // ARG = SP - n - 5
+        yield `@SP\n`;
+        yield `D=M\n`;
+        yield `@${command.arguments + 5}\n`;
+        yield `D=D-A\n`;
+        yield `@ARG\n`;
+        yield `M=D\n`;
+        // LCL = SP
+        yield `@SP\n`;
+        yield `D=M\n`;
+        yield `@LCL\n`;
+        yield `M=D\n`;
+        // goto (f)
+        yield* this.jump(this.buildFunctionLabel(command.name));
+        // (return-address)
+        yield `(${returnAddress})\n`;
     }
 
     /**
@@ -360,9 +432,7 @@ export class Compiler {
     private lineNumber = 0;
     private functionName: string = "";
     private commandId = 0;
-    private requestCommandId() {
-        return this.commandId++;
-    }
+    private callId = 0;
 
     public async *compile(
         files: Array<{
@@ -387,10 +457,7 @@ export class Compiler {
                 }
                 const arithmeticCommand = this.parseArithmeticCommand(line);
                 if (arithmeticCommand) {
-                    yield* this.emitArithmeticCommand(
-                        arithmeticCommand,
-                        this.requestCommandId()
-                    );
+                    yield* this.emitArithmeticCommand(arithmeticCommand);
                     continue;
                 }
                 const label = this.parseLabelCommand(line);
@@ -411,6 +478,11 @@ export class Compiler {
                 const functionCommand = this.parseFunctionCommand(line);
                 if (functionCommand) {
                     yield* this.emitFunctionCommand(functionCommand);
+                    continue;
+                }
+                const callCommand = this.parseCallCommand(line);
+                if (callCommand) {
+                    yield* this.emitCallCommand(callCommand);
                     continue;
                 }
                 throw new Error(`Unable to parse "${line}"`);
