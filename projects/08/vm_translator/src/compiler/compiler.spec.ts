@@ -1,7 +1,60 @@
 import { Compiler } from "./compiler";
 
 describe(`compiler`, () => {
-    const init = [`@256\n`, `D=A\n`, `@SP\n`, `A=D\n`];
+    const init = [
+        `@256\n`,
+        `D=A\n`,
+        `@SP\n`,
+        `A=D\n`,
+        "@return-address.0\n",
+        "D=A\n",
+        "@SP\n",
+        "A=M\n",
+        "M=D\n",
+        "@SP\n",
+        "AM=M+1\n",
+        "@LCL\n",
+        "D=M\n",
+        "@SP\n",
+        "A=M\n",
+        "M=D\n",
+        "@SP\n",
+        "AM=M+1\n",
+        "@ARG\n",
+        "D=M\n",
+        "@SP\n",
+        "A=M\n",
+        "M=D\n",
+        "@SP\n",
+        "AM=M+1\n",
+        "@THIS\n",
+        "D=M\n",
+        "@SP\n",
+        "A=M\n",
+        "M=D\n",
+        "@SP\n",
+        "AM=M+1\n",
+        "@THAT\n",
+        "D=M\n",
+        "@SP\n",
+        "A=M\n",
+        "M=D\n",
+        "@SP\n",
+        "AM=M+1\n",
+        "@SP\n",
+        "D=M\n",
+        "@5\n",
+        "D=D-A\n",
+        "@ARG\n",
+        "M=D\n",
+        "@SP\n",
+        "D=M\n",
+        "@LCL\n",
+        "M=D\n",
+        "@Sys.init\n",
+        "0;JMP\n",
+        "(return-address.0)\n",
+    ];
 
     let compiler: Compiler;
 
@@ -706,7 +759,7 @@ describe(`compiler`, () => {
             ]),
             [
                 ...init,
-                "@return-address.0\n",
+                "@return-address.1\n",
                 "D=A\n",
                 "@SP\n",
                 "A=M\n",
@@ -751,9 +804,9 @@ describe(`compiler`, () => {
                 "D=M\n",
                 "@LCL\n",
                 "M=D\n",
-                "@file_name.foo\n",
+                "@foo\n",
                 "0;JMP\n",
-                "(return-address.0)\n",
+                "(return-address.1)\n",
             ]
         );
     });

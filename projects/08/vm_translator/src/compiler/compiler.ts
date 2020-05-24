@@ -29,6 +29,7 @@ const GOTO_PATTERN = /^\s*goto (\w[\w\._\d]*)\s*$/;
 const IF_GOTO_PATTERN = /^\s*if-goto (\w[\w\._\d]*)\s*$/;
 const FUNCTION_PATTERN = /^\s*function (\w[\w\._\d]*) (\d+)\s*$/;
 const CALL_PATTERN = /^\s*call (\w[\w\._\d]*) (\d+)\s*$/;
+const RETURN_PATTERN = /^\s*return\s*$/;
 
 interface MemoryAccessCommand {
     type: MemoryAccessCommandType;
@@ -413,9 +414,21 @@ export class Compiler {
         yield `@LCL\n`;
         yield `M=D\n`;
         // goto (f)
-        yield* this.jump(this.buildFunctionLabel(command.name));
+        yield* this.jump(command.name);
         // (return-address)
         yield `(${returnAddress})\n`;
+    }
+
+    private *emitReturnCommand(): Iterable<string> {
+        // FRAME = LCL
+        // RET = *(FRAME - 5)
+        // *ARG = pop()
+        // SP = ARG + 1
+        // THAT = *(FRAME - 1)
+        // THIS = *(FRAME - 2)
+        // ARG = *(FRAME - 3)
+        // LCL = *(FRAME - 4)
+        // goto RET
     }
 
     /**
@@ -426,6 +439,10 @@ export class Compiler {
         yield `D=A\n`;
         yield `@SP\n`;
         yield `A=D\n`;
+        yield* this.emitCallCommand({
+            name: "Sys.init",
+            arguments: 0,
+        });
     }
 
     private fileName: string = "";
@@ -483,6 +500,10 @@ export class Compiler {
                 const callCommand = this.parseCallCommand(line);
                 if (callCommand) {
                     yield* this.emitCallCommand(callCommand);
+                    continue;
+                }
+                if (RETURN_PATTERN.test(line)) {
+                    yield* this.emitReturnCommand();
                     continue;
                 }
                 throw new Error(`Unable to parse "${line}"`);
