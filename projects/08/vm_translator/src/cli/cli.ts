@@ -1,31 +1,33 @@
 const start = clock();
 
 import * as fs from "fs";
+import { glob } from "glob";
 import * as readline from "readline";
 import * as yargs from "yargs";
 import { Compiler } from "../compiler/compiler";
 
-const fileIn = (yargs.argv.file || yargs.argv.in) as string;
-if (!fileIn) {
-    throw new Error(`Please provide a .asm file input using --file or --in`);
-}
-const fileParts = fileIn.split(/[\.\/]/);
-const fileInRoot = fileParts[fileParts.length - 2];
-const fileOut = (yargs.argv.out ||
-    `${fileIn.replace(/\.[^\.]+$/, ".asm")}`) as string;
-
 async function main() {
-    const fileStream = fs.createReadStream(fileIn);
-    const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity,
+    const pattern = (yargs.argv.file ||
+        yargs.argv.in ||
+        yargs.argv.glob) as string;
+    if (!pattern) {
+        throw new Error(
+            `Please provide a .asm file input pattern using --file or --in or --glob`
+        );
+    }
+    const fileOpts = glob.sync(pattern).map((file) => {
+        const fileStream = fs.createReadStream(file);
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity,
+        });
+        return { lines: rl, name: file };
     });
+    const fileOut = (yargs.argv.out || "out.asm") as string;
     fs.writeFileSync(fileOut, "");
     const out = fs.createWriteStream(fileOut, { flags: "a" });
     const compiler = new Compiler();
-    for await (const line of compiler.compile([
-        { lines: rl, name: fileInRoot },
-    ])) {
+    for await (const line of compiler.compile(fileOpts)) {
         out.write(line);
     }
     console.log(`Built asm file ${fileOut} in ${clock(start)}ms`);

@@ -20,21 +20,24 @@ const captureEnum = (Enum: { [key: string]: string | number }) =>
         .join("|")})`;
 
 const MEMORY_ACCESS_COMMAND_PATTERN = new RegExp(
-    `^${captureEnum(MemoryAccessCommandType)} ${captureEnum(Segment)} (\\d+)$`
+    `^${captureEnum(MemoryAccessCommandType)} ${captureEnum(
+        Segment
+    )} (\\d+)\\s*(\\/\\/.*)?$`
 );
-const EMPTY_PATTERN = /^\s*$/;
+const EMPTY_PATTERN = /^\s*(\/\/.*)?$/;
 const COMMENT_PATTERN = /^\s*\/\/.*$/;
-const LABEL_PATTERN = /^\s*label (\w[\w\._\d]*)\s*$/;
-const GOTO_PATTERN = /^\s*goto (\w[\w\._\d]*)\s*$/;
-const IF_GOTO_PATTERN = /^\s*if-goto (\w[\w\._\d]*)\s*$/;
-const FUNCTION_PATTERN = /^\s*function (\w[\w\._\d]*) (\d+)\s*$/;
-const CALL_PATTERN = /^\s*call (\w[\w\._\d]*) (\d+)\s*$/;
-const RETURN_PATTERN = /^\s*return\s*$/;
+const LABEL_PATTERN = /^\s*label (\w[\w\._\d]*)\s*(\/\/.*)?$/;
+const GOTO_PATTERN = /^\s*goto (\w[\w\._\d]*)\s*(\/\/.*)?$/;
+const IF_GOTO_PATTERN = /^\s*if-goto (\w[\w\._\d]*)\s*(\/\/.*)?$/;
+const FUNCTION_PATTERN = /^\s*function (\w[\w\._\d]*) (\d+)\s*(\/\/.*)?$/;
+const CALL_PATTERN = /^\s*call (\w[\w\._\d]*) (\d+)\s*(\/\/.*)?$/;
+const RETURN_PATTERN = /^\s*return\s*(\/\/.*)?$/;
 
 interface MemoryAccessCommand {
     type: MemoryAccessCommandType;
     segment: Segment;
     offset: number;
+    isPointer?: boolean;
 }
 
 interface FunctionCommand {
@@ -64,7 +67,7 @@ enum ArithmeticCommand {
 }
 
 const ARITHMETIC_COMMAND_PATTERN = new RegExp(
-    `^${captureEnum(ArithmeticCommand)}$`
+    `^${captureEnum(ArithmeticCommand)}\\s*(\\/\\/.*)?$`
 );
 
 enum JumpMnm {
@@ -75,6 +78,11 @@ enum JumpMnm {
     JGT = "JGT",
     JNE = "JNE",
     JMP = "JMP",
+}
+
+enum Temp {
+    FRAME = "R13", // frame temp variable address
+    RET = "R14", // return temp variable address
 }
 
 export class Compiler {
@@ -184,11 +192,13 @@ export class Compiler {
      */
     private *selectMemory(
         segment: Omit<Segment, Segment.Constant>,
-        offset: number
+        offset: number,
+        isPointer: boolean = true
     ): Iterable<string> {
         const baseAddress = this.getBaseAddress(segment, offset);
         yield `@${baseAddress}\n`;
         if (
+            !isPointer ||
             segment === Segment.Static ||
             segment === Segment.Pointer ||
             segment === Segment.Temp
@@ -210,13 +220,14 @@ export class Compiler {
      */
     private *storeSegmentValueInD(
         segment: Segment,
-        offset: number
+        offset: number,
+        isPointer: boolean = true
     ): Iterable<string> {
         if (segment === Segment.Constant) {
             yield `@${offset}\n`;
             yield `D=A\n`;
         } else {
-            yield* this.selectMemory(segment, offset);
+            yield* this.selectMemory(segment, offset, isPointer);
             yield `D=M\n`;
         }
     }
@@ -254,7 +265,11 @@ export class Compiler {
             // Store the top of the stack's value in D
             yield `D=M\n`;
             // Pop the selected value into the selected segment
-            yield* this.selectMemory(command.segment, command.offset);
+            yield* this.selectMemory(
+                command.segment,
+                command.offset,
+                command.isPointer
+            );
             yield `M=D\n`;
         }
     }
@@ -262,9 +277,13 @@ export class Compiler {
     private *jump(
         variable: string,
         comp: "0" | "D" = "0",
-        cond: JumpMnm = JumpMnm.JMP
+        cond: JumpMnm = JumpMnm.JMP,
+        isPointer = false
     ): Iterable<string> {
         yield `@${variable}\n`;
+        if (isPointer) {
+            yield `A=M\n`;
+        }
         yield `${comp};${cond}\n`;
     }
 
@@ -421,14 +440,53 @@ export class Compiler {
 
     private *emitReturnCommand(): Iterable<string> {
         // FRAME = LCL
+        yield* this.storeSegmentValueInD(Segment.Local, 0, false);
+        yield `@${Temp.FRAME}\n`;
+        yield `M=D\n`;
         // RET = *(FRAME - 5)
+        yield `@5\n`;
+        yield `A=D-A\n`;
+        yield `D=M\n`;
+        yield `@${Temp.RET}\n`;
+        yield `M=D\n`;
         // *ARG = pop()
+        yield* this.emitMemoryAccessCommand({
+            type: MemoryAccessCommandType.Pop,
+            segment: Segment.Argument,
+            offset: 0,
+            isPointer: true,
+        });
         // SP = ARG + 1
+        yield `@ARG\n`;
+        yield `D=M+1\n`;
+        yield `@SP\n`;
+        yield `M=D\n`;
         // THAT = *(FRAME - 1)
+        yield `@${Temp.FRAME}\n`;
+        yield `AM=M-1\n`;
+        yield `D=M\n`;
+        yield* this.selectMemory(Segment.That, 0, false);
+        yield `M=D\n`;
         // THIS = *(FRAME - 2)
+        yield `@${Temp.FRAME}\n`;
+        yield `AM=M-1\n`;
+        yield `D=M\n`;
+        yield* this.selectMemory(Segment.This, 0, false);
+        yield `M=D\n`;
         // ARG = *(FRAME - 3)
+        yield `@${Temp.FRAME}\n`;
+        yield `AM=M-1\n`;
+        yield `D=M\n`;
+        yield* this.selectMemory(Segment.Argument, 0, false);
+        yield `M=D\n`;
         // LCL = *(FRAME - 4)
+        yield `@${Temp.FRAME}\n`;
+        yield `AM=M-1\n`;
+        yield `D=M\n`;
+        yield* this.selectMemory(Segment.Local, 0, false);
+        yield `M=D\n`;
         // goto RET
+        yield* this.jump(Temp.RET, "0", JumpMnm.JMP, true);
     }
 
     /**
@@ -467,6 +525,9 @@ export class Compiler {
                     continue;
                 }
                 yield `// ${this.fileName}:${this.lineNumber} ${line}\n`;
+                if (COMMENT_PATTERN.test(line)) {
+                    continue;
+                }
                 const memoryAccessCommand = this.parseMemoryAccessCommand(line);
                 if (memoryAccessCommand) {
                     yield* this.emitMemoryAccessCommand(memoryAccessCommand);

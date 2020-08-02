@@ -811,6 +811,86 @@ describe(`compiler`, () => {
         );
     });
 
+    it(`should ignore comments proceeding a valid command`, async () => {
+        await expectLines(
+            compiler.compile([
+                {
+                    lines: lines(`push constant 17         // whatever`),
+                    name: "file_name",
+                },
+            ]),
+            [
+                ...init,
+                // Select
+                `@17\n`,
+                `D=A\n`,
+                // Push
+                `@SP\n`,
+                `A=M\n`,
+                `M=D\n`,
+                // SP++
+                `@SP\n`,
+                `AM=M+1\n`,
+            ]
+        );
+    });
+
+    it(`Should translate a return command`, async () => {
+        await expectLines(
+            compiler.compile([
+                {
+                    lines: lines(`return`),
+                    name: "file_name",
+                },
+            ]),
+            [
+                ...init,
+                "@LCL\n",
+                "D=M\n",
+                "@R13\n",
+                "M=D\n",
+                "@5\n",
+                "A=D-A\n",
+                "D=M\n",
+                "@R14\n",
+                "M=D\n",
+                "@SP\n",
+                "AM=M-1\n",
+                "D=M\n",
+                "@ARG\n",
+                "A=M\n",
+                "M=D\n",
+                "@ARG\n",
+                "D=M+1\n",
+                "@SP\n",
+                "M=D\n",
+                "@R13\n",
+                "AM=M-1\n",
+                "D=M\n",
+                "@THAT\n",
+                "M=D\n",
+                "@R13\n",
+                "AM=M-1\n",
+                "D=M\n",
+                "@THIS\n",
+                "M=D\n",
+                "@R13\n",
+                "AM=M-1\n",
+                "D=M\n",
+                "@ARG\n",
+                "M=D\n",
+                "@R13\n",
+                "AM=M-1\n",
+                "D=M\n",
+                "@LCL\n",
+                "M=D\n",
+                "@R14\n",
+                "A=M\n",
+                "0;JMP\n",
+            ]
+        );
+    });
+
     async function* lines(...strs: string[]): AsyncIterable<string> {
         yield* strs;
     }
@@ -819,19 +899,14 @@ describe(`compiler`, () => {
         lines: AsyncIterable<string>,
         expected: string[]
     ) {
-        let i = 0;
+        const testedLines: string[] = [];
         for await (const line of lines) {
             if (/^\/\//.test(line)) {
                 // ignore comments
                 continue;
             }
-            if (line !== expected[i]) {
-                throw new Error(
-                    `Line ${i}, expected ${expected[i]}, got ${line}`
-                );
-            }
-            i++;
+            testedLines.push(line);
         }
-        expect(i).toBe(expected.length);
+        expect(testedLines).toEqual(expected);
     }
 });
