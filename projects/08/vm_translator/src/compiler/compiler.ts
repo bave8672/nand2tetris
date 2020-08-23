@@ -1,3 +1,5 @@
+import * as readline from "readline";
+
 enum Segment {
     Argument = "argument",
     Local = "local",
@@ -85,7 +87,24 @@ enum Temp {
     RET = "R14", // return temp variable address
 }
 
+export interface CompilerConfig {
+    emitSys: boolean;
+}
+
+const CONFIG_DEFAULT: CompilerConfig = {
+    emitSys: true,
+};
+
 export class Compiler {
+    public readonly config: CompilerConfig;
+    public constructor(config: Partial<CompilerConfig> = {}) {
+        this.config = {
+            ...CONFIG_DEFAULT,
+            ...config,
+        };
+        console.log(this.config);
+    }
+
     private parseMemoryAccessCommand(
         command: string
     ): MemoryAccessCommand | void {
@@ -260,16 +279,22 @@ export class Compiler {
             // Push the value onto the stack
             yield* this.pushDOntoStack();
         } else {
-            // SP--
-            yield* this.decrementStackPointer();
-            // Store the top of the stack's value in D
-            yield `D=M\n`;
-            // Pop the selected value into the selected segment
+            // store the memory location in a temp slot
             yield* this.selectMemory(
                 command.segment,
                 command.offset,
                 command.isPointer
             );
+            yield `D=A\n`;
+            yield `@R13\n`;
+            yield `M=D\n`;
+            // SP--
+            yield* this.decrementStackPointer();
+            // Store the top of the stack's value in D
+            yield `D=M\n`;
+            // Pop the selected value into the selected segment
+            yield `@R13\n`;
+            yield `A=M\n`;
             yield `M=D\n`;
         }
     }
@@ -489,18 +514,31 @@ export class Compiler {
         yield* this.jump(Temp.RET, "0", JumpMnm.JMP, true);
     }
 
+    private consoleReplaceLine(progress: string) {
+        if (process.stdout.clearLine) {
+            process.stdout.clearLine(0);
+        }
+        readline.cursorTo(process.stdout, 0);
+        process.stdout.write(progress);
+    }
+
     /**
      * Initialize the stack pointer
      */
     private *init(): Iterable<string> {
+        yield `// Compiled VM code -> hack\n`;
+        yield `// ${JSON.stringify({ config: this.config })}\n`;
+        yield `// init SP\n`;
         yield `@256\n`;
         yield `D=A\n`;
         yield `@SP\n`;
         yield `A=D\n`;
-        yield* this.emitCallCommand({
-            name: "Sys.init",
-            arguments: 0,
-        });
+        if (this.config.emitSys) {
+            yield* this.emitCallCommand({
+                name: "Sys.init",
+                arguments: 0,
+            });
+        }
     }
 
     private fileName: string = "";
@@ -509,66 +547,75 @@ export class Compiler {
     private commandId = 0;
     private callId = 0;
 
+    private *compileLine(line: string): Iterable<string> {
+        this.consoleReplaceLine(
+            `Compiling ${this.fileName}#${this.lineNumber}`
+        );
+        this.lineNumber++;
+        if (EMPTY_PATTERN.test(line) || COMMENT_PATTERN.test(line)) {
+            return;
+        }
+        yield `// ${this.fileName}:${this.lineNumber} ${line}\n`;
+        if (COMMENT_PATTERN.test(line)) {
+            return;
+        }
+        const memoryAccessCommand = this.parseMemoryAccessCommand(line);
+        if (memoryAccessCommand) {
+            yield* this.emitMemoryAccessCommand(memoryAccessCommand);
+            return;
+        }
+        const arithmeticCommand = this.parseArithmeticCommand(line);
+        if (arithmeticCommand) {
+            yield* this.emitArithmeticCommand(arithmeticCommand);
+            return;
+        }
+        const label = this.parseLabelCommand(line);
+        if (label) {
+            yield* this.emitLabelCommand(label);
+            return;
+        }
+        const gotoCommand = this.parseGotoCommand(line);
+        if (gotoCommand) {
+            yield* this.emitGotoCommand(gotoCommand);
+            return;
+        }
+        const ifGotoCommand = this.parseIfGotoCommand(line);
+        if (ifGotoCommand) {
+            yield* this.emitIfGotoCommand(ifGotoCommand);
+            return;
+        }
+        const functionCommand = this.parseFunctionCommand(line);
+        if (functionCommand) {
+            yield* this.emitFunctionCommand(functionCommand);
+            return;
+        }
+        const callCommand = this.parseCallCommand(line);
+        if (callCommand) {
+            yield* this.emitCallCommand(callCommand);
+            return;
+        }
+        if (RETURN_PATTERN.test(line)) {
+            yield* this.emitReturnCommand();
+            return;
+        }
+        throw new Error(`Unable to parse "${line}"`);
+    }
+
     public async *compile(
-        files: Array<{
-            lines: AsyncIterable<string>;
-            name: string;
-        }>
+        files: Array<() => { name: string; lines: AsyncIterable<string> }>
     ): AsyncIterable<string> {
         yield* this.init();
-        for (const file of files) {
+        for (const getFile of files) {
+            const file = getFile();
+            console.log(`Compiling ${file.name} ...`);
             this.fileName = file.name;
             this.lineNumber = 0;
             for await (const line of file.lines) {
-                this.lineNumber++;
-                if (EMPTY_PATTERN.test(line) || COMMENT_PATTERN.test(line)) {
-                    continue;
-                }
-                yield `// ${this.fileName}:${this.lineNumber} ${line}\n`;
-                if (COMMENT_PATTERN.test(line)) {
-                    continue;
-                }
-                const memoryAccessCommand = this.parseMemoryAccessCommand(line);
-                if (memoryAccessCommand) {
-                    yield* this.emitMemoryAccessCommand(memoryAccessCommand);
-                    continue;
-                }
-                const arithmeticCommand = this.parseArithmeticCommand(line);
-                if (arithmeticCommand) {
-                    yield* this.emitArithmeticCommand(arithmeticCommand);
-                    continue;
-                }
-                const label = this.parseLabelCommand(line);
-                if (label) {
-                    yield* this.emitLabelCommand(label);
-                    continue;
-                }
-                const gotoCommand = this.parseGotoCommand(line);
-                if (gotoCommand) {
-                    yield* this.emitGotoCommand(gotoCommand);
-                    continue;
-                }
-                const ifGotoCommand = this.parseIfGotoCommand(line);
-                if (ifGotoCommand) {
-                    yield* this.emitIfGotoCommand(ifGotoCommand);
-                    continue;
-                }
-                const functionCommand = this.parseFunctionCommand(line);
-                if (functionCommand) {
-                    yield* this.emitFunctionCommand(functionCommand);
-                    continue;
-                }
-                const callCommand = this.parseCallCommand(line);
-                if (callCommand) {
-                    yield* this.emitCallCommand(callCommand);
-                    continue;
-                }
-                if (RETURN_PATTERN.test(line)) {
-                    yield* this.emitReturnCommand();
-                    continue;
-                }
-                throw new Error(`Unable to parse "${line}"`);
+                yield* this.compileLine(line);
             }
+            this.consoleReplaceLine(
+                `Compiling ${this.fileName} OK (${this.lineNumber} lines emitted)\n`
+            );
         }
     }
 }

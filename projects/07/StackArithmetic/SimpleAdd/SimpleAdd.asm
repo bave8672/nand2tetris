@@ -1,8 +1,11 @@
+// Compiled VM code -> hack
+// {"config":{"emitSys":false}}
+// init SP
 @256
 D=A
 @SP
 A=D
-// SimpleAdd:7 push constant 7
+// SimpleAdd.vm:7 push constant 7
 @7
 D=A
 @SP
@@ -10,7 +13,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// SimpleAdd:8 push constant 8
+// SimpleAdd.vm:8 push constant 8
 @8
 D=A
 @SP
@@ -18,10 +21,12 @@ A=M
 M=D
 @SP
 AM=M+1
-// SimpleAdd:9 add
+// SimpleAdd.vm:9 add
 @SP
 AM=M-1
 D=M
 @SP
 AM=M-1
 M=D+M
+@SP
+AM=M+1

@@ -6,7 +6,11 @@
     "scripts": {
         "build": "tsc --project tsconfig.build.json",
         "test": "jest",
-        "start": "node ./built/cli/cli.js"
+        "start": "node ./built/cli/cli.js",
+        "FibonacciElement": "node ./built/cli/cli.js --in ../FunctionCalls/FibonacciElement/**/*.vm --out ../FunctionCalls/FibonacciElement/FibonacciElement.asm",
+        "SimpleFunction": "node ./built/cli/cli.js --in ../FunctionCalls/SimpleFunction/**/*.vm --out ../FunctionCalls/SimpleFunction/SimpleFunction.asm",
+        "CPUEmulator": "bash  ../../../tools/CPUEmulator.sh",
+        "VMEmulator": "bash  ../../../tools/VMEmulator.sh"
     },
     "author": "",
     "license": "ISC",
