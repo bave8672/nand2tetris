@@ -87,13 +87,9 @@ enum Temp {
     RET = "R14", // return temp variable address
 }
 
-export interface CompilerConfig {
-    emitSys: boolean;
-}
+export interface CompilerConfig {}
 
-const CONFIG_DEFAULT: CompilerConfig = {
-    emitSys: true,
-};
+const CONFIG_DEFAULT: CompilerConfig = {};
 
 export class Compiler {
     public readonly config: CompilerConfig;
@@ -271,7 +267,8 @@ export class Compiler {
     }
 
     private *emitMemoryAccessCommand(
-        command: MemoryAccessCommand
+        command: MemoryAccessCommand,
+        tempLocation: "R13" | "R15" = "R13"
     ): Iterable<string> {
         if (command.type === MemoryAccessCommandType.Push) {
             // Store the memory value in D
@@ -286,14 +283,14 @@ export class Compiler {
                 command.isPointer
             );
             yield `D=A\n`;
-            yield `@R13\n`;
+            yield `@${tempLocation}\n`;
             yield `M=D\n`;
             // SP--
             yield* this.decrementStackPointer();
             // Store the top of the stack's value in D
             yield `D=M\n`;
             // Pop the selected value into the selected segment
-            yield `@R13\n`;
+            yield `@${tempLocation}\n`;
             yield `A=M\n`;
             yield `M=D\n`;
         }
@@ -475,12 +472,10 @@ export class Compiler {
         yield `@${Temp.RET}\n`;
         yield `M=D\n`;
         // *ARG = pop()
-        yield* this.emitMemoryAccessCommand({
-            type: MemoryAccessCommandType.Pop,
-            segment: Segment.Argument,
-            offset: 0,
-            isPointer: true,
-        });
+        yield* this.decrementStackPointer();
+        yield `D=M\n`;
+        yield* this.selectMemory(Segment.Argument, 0, true);
+        yield `M=D\n`;
         // SP = ARG + 1
         yield `@ARG\n`;
         yield `D=M+1\n`;
@@ -527,13 +522,13 @@ export class Compiler {
      */
     private *init(): Iterable<string> {
         yield `// Compiled VM code -> hack\n`;
-        yield `// ${JSON.stringify({ config: this.config })}\n`;
         yield `// init SP\n`;
         yield `@256\n`;
         yield `D=A\n`;
         yield `@SP\n`;
         yield `A=D\n`;
-        if (this.config.emitSys) {
+        if (this.emitSys) {
+            yield `// Call Sys.init()\n`;
             yield* this.emitCallCommand({
                 name: "Sys.init",
                 arguments: 0,
@@ -541,6 +536,7 @@ export class Compiler {
         }
     }
 
+    private emitSys: boolean = false;
     private fileName: string = "";
     private lineNumber = 0;
     private functionName: string = "";
@@ -602,15 +598,15 @@ export class Compiler {
     }
 
     public async *compile(
-        files: Array<() => { name: string; lines: AsyncIterable<string> }>
+        files: Array<{ name: string; getLines: () => AsyncIterable<string> }>
     ): AsyncIterable<string> {
+        this.emitSys = files.some((file) => file.name === "Sys.vm");
         yield* this.init();
-        for (const getFile of files) {
-            const file = getFile();
+        for (const file of files) {
             console.log(`Compiling ${file.name} ...`);
             this.fileName = file.name;
             this.lineNumber = 0;
-            for await (const line of file.lines) {
+            for await (const line of file.getLines()) {
                 yield* this.compileLine(line);
             }
             this.consoleReplaceLine(

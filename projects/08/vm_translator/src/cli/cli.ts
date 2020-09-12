@@ -41,15 +41,16 @@ function getPattern() {
 
 function getFiles() {
     const pattern = getPattern();
-    const files = glob.sync(pattern).map((file) => () => {
-        const name = file.replace(/^[^[a-zA-Z0-9]?(.+\/)?/, "");
-        const fileStream = fs.createReadStream(file);
-        const rl = readline.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity,
-        });
-        return { lines: rl, name };
-    });
+    const files = glob.sync(pattern).map((file) => ({
+        name: file.replace(/^[^[a-zA-Z0-9]?(.+\/)?/, ""),
+        getLines: () => {
+            const fileStream = fs.createReadStream(file);
+            return readline.createInterface({
+                input: fileStream,
+                crlfDelay: Infinity,
+            });
+        },
+    }));
     return files;
 }
 
@@ -58,14 +59,7 @@ function getFileOut() {
 }
 
 function getConfig(): CompilerConfig {
-    const emitSys = getEmitSys();
-    return {
-        emitSys,
-    };
-}
-
-function getEmitSys() {
-    return yargs.argv.emitSys === "true" || yargs.argv.emitSys === "1";
+    return {};
 }
 
 main().catch(console.error);

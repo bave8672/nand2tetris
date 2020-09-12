@@ -67,7 +67,7 @@ describe(`vm compiler`, () => {
         it(`should throw when command is invalid`, async (done) => {
             try {
                 for await (const line of compiler.compile([
-                    () => ({ lines: lines(`babaganoush`), name: "file_name" }),
+                    { getLines: () => lines(`babaganoush`), name: "file_name" },
                 ])) {
                     continue;
                 }
@@ -79,7 +79,7 @@ describe(`vm compiler`, () => {
         it(`should skip empty lines`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(``), name: "file_name" }),
+                    { getLines: () => lines(``), name: "file_name" },
                 ]),
                 [...init]
             );
@@ -88,10 +88,10 @@ describe(`vm compiler`, () => {
         it(`should skip commented`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`   // hello `, "// world"),
+                    {
+                        getLines: () => lines(`   // hello `, "// world"),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [...init]
             );
@@ -100,10 +100,10 @@ describe(`vm compiler`, () => {
         it(`should push a constant onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push constant 17`),
+                    {
+                        getLines: () => lines(`push constant 17`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -124,10 +124,10 @@ describe(`vm compiler`, () => {
         it(`should push an argument onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push argument 2`),
+                    {
+                        getLines: () => lines(`push argument 2`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -151,10 +151,10 @@ describe(`vm compiler`, () => {
         it(`should push an argument onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push argument 2`),
+                    {
+                        getLines: () => lines(`push argument 2`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -178,10 +178,10 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack onto the argument`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`pop argument 2`),
+                    {
+                        getLines: () => lines(`pop argument 2`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -203,10 +203,10 @@ describe(`vm compiler`, () => {
         it(`should push a local variable onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push local 999`),
+                    {
+                        getLines: () => lines(`push local 999`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -230,7 +230,7 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack into a local variable`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`pop local 1`), name: "file_name" }),
+                    { getLines: () => lines(`pop local 1`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -252,10 +252,10 @@ describe(`vm compiler`, () => {
         it(`should push a this variable onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push this 999`),
+                    {
+                        getLines: () => lines(`push this 999`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -279,7 +279,7 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack into a this variable`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`pop this 1`), name: "file_name" }),
+                    { getLines: () => lines(`pop this 1`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -301,10 +301,10 @@ describe(`vm compiler`, () => {
         it(`should push a that variable onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push that 999`),
+                    {
+                        getLines: () => lines(`push that 999`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -328,7 +328,7 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack into a that variable`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`pop that 1`), name: "file_name" }),
+                    { getLines: () => lines(`pop that 1`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -350,7 +350,10 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack into a static variable`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`pop static 1`), name: "file_name" }),
+                    {
+                        getLines: () => lines(`pop static 1`),
+                        name: "file_name",
+                    },
                 ]),
                 [
                     ...init,
@@ -369,10 +372,10 @@ describe(`vm compiler`, () => {
         it(`should push a static variable onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push static 1`),
+                    {
+                        getLines: () => lines(`push static 1`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -393,7 +396,7 @@ describe(`vm compiler`, () => {
         it(`should push a temp variable onto the stack`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`push temp 1`), name: "file_name" }),
+                    { getLines: () => lines(`push temp 1`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -414,7 +417,7 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack into a temp variable`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`pop temp 0`), name: "file_name" }),
+                    { getLines: () => lines(`pop temp 0`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -434,10 +437,10 @@ describe(`vm compiler`, () => {
         it(`should pop off the stack into a static variable`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`pop static 100`),
+                    {
+                        getLines: () => lines(`pop static 100`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -456,10 +459,10 @@ describe(`vm compiler`, () => {
         it(`should push a pointer onto the stack 0`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push pointer 0`),
+                    {
+                        getLines: () => lines(`push pointer 0`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -480,10 +483,10 @@ describe(`vm compiler`, () => {
         it(`should push a pointer onto the stack 1`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push pointer 1`),
+                    {
+                        getLines: () => lines(`push pointer 1`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -504,10 +507,10 @@ describe(`vm compiler`, () => {
         it(`should pop a pointer off the stack 0`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`pop pointer 0`),
+                    {
+                        getLines: () => lines(`pop pointer 0`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -526,10 +529,10 @@ describe(`vm compiler`, () => {
         it(`should pop a pointer off the stack 1`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`pop pointer 1`),
+                    {
+                        getLines: () => lines(`pop pointer 1`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -548,7 +551,7 @@ describe(`vm compiler`, () => {
         it(`should add two variables together`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`add`), name: "file_name" }),
+                    { getLines: () => lines(`add`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -568,7 +571,7 @@ describe(`vm compiler`, () => {
         it(`should subtract two variables`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`sub`), name: "file_name" }),
+                    { getLines: () => lines(`sub`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -588,7 +591,7 @@ describe(`vm compiler`, () => {
         it(`should negate the top value`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`neg`), name: "file_name" }),
+                    { getLines: () => lines(`neg`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -604,7 +607,7 @@ describe(`vm compiler`, () => {
         it(`should calculate if the top two values are equal`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`eq`), name: "file_name" }),
+                    { getLines: () => lines(`eq`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -637,7 +640,7 @@ describe(`vm compiler`, () => {
         it(`should calculate if the x is greater than y`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`gt`), name: "file_name" }),
+                    { getLines: () => lines(`gt`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -670,7 +673,7 @@ describe(`vm compiler`, () => {
         it(`should calculate if the x is less than y`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`lt`), name: "file_name" }),
+                    { getLines: () => lines(`lt`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -703,7 +706,7 @@ describe(`vm compiler`, () => {
         it(`should calculate x AND y`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`and`), name: "file_name" }),
+                    { getLines: () => lines(`and`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -723,7 +726,7 @@ describe(`vm compiler`, () => {
         it(`should calculate x OR y`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`or`), name: "file_name" }),
+                    { getLines: () => lines(`or`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -743,7 +746,7 @@ describe(`vm compiler`, () => {
         it(`should calculate NOT y`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`not`), name: "file_name" }),
+                    { getLines: () => lines(`not`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -761,7 +764,7 @@ describe(`vm compiler`, () => {
             (compiler as any).functionName = "MyFn";
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`label LOOP`), name: "file_name" }),
+                    { getLines: () => lines(`label LOOP`), name: "file_name" },
                 ]),
                 [...init, "(file_name.MyFn$LOOP)\n"]
             );
@@ -771,7 +774,7 @@ describe(`vm compiler`, () => {
             (compiler as any).functionName = "MyFn";
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`goto LOOP`), name: "file_name" }),
+                    { getLines: () => lines(`goto LOOP`), name: "file_name" },
                 ]),
                 [...init, "@file_name.MyFn$LOOP\n", "0;JMP\n"]
             );
@@ -781,7 +784,10 @@ describe(`vm compiler`, () => {
             (compiler as any).functionName = "MyFn";
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`if-goto LOOP`), name: "file_name" }),
+                    {
+                        getLines: () => lines(`if-goto LOOP`),
+                        name: "file_name",
+                    },
                 ]),
                 [
                     ...init,
@@ -798,10 +804,10 @@ describe(`vm compiler`, () => {
             (compiler as any).functionName = "MyFn";
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`function foo 3`),
+                    {
+                        getLines: () => lines(`function foo 3`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -844,7 +850,7 @@ describe(`vm compiler`, () => {
             (compiler as any).functionName = "MyFn";
             await expectLines(
                 compiler.compile([
-                    () => ({ lines: lines(`call foo 3`), name: "file_name" }),
+                    { getLines: () => lines(`call foo 3`), name: "file_name" },
                 ]),
                 [
                     ...init,
@@ -903,10 +909,11 @@ describe(`vm compiler`, () => {
         it(`should ignore comments proceeding a valid command`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`push constant 17         // whatever`),
+                    {
+                        getLines: () =>
+                            lines(`push constant 17         // whatever`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -927,10 +934,10 @@ describe(`vm compiler`, () => {
         it(`Should translate a return command`, async () => {
             await expectLines(
                 compiler.compile([
-                    () => ({
-                        lines: lines(`return`),
+                    {
+                        getLines: () => lines(`return`),
                         name: "file_name",
-                    }),
+                    },
                 ]),
                 [
                     ...init,
@@ -1007,38 +1014,23 @@ describe(`vm compiler`, () => {
         });
 
         it(`MemoryAccess/BasicTest`, () => {
-            runExternalTest(
-                `../../07/MemoryAccess/BasicTest`,
-                `--emitSys=false`
-            );
+            runExternalTest(`../../07/MemoryAccess/BasicTest`);
         });
 
         it(`MemoryAccess/PointerTest`, () => {
-            runExternalTest(
-                `../../07/MemoryAccess/PointerTest`,
-                `--emitSys=false`
-            );
+            runExternalTest(`../../07/MemoryAccess/PointerTest`);
         });
 
         it(`MemoryAccess/StaticTest`, () => {
-            runExternalTest(
-                `../../07/MemoryAccess/StaticTest`,
-                `--emitSys=false`
-            );
+            runExternalTest(`../../07/MemoryAccess/StaticTest`);
         });
 
         it(`StackArithmetic/SimpleAdd`, () => {
-            runExternalTest(
-                `../../07/StackArithmetic/SimpleAdd`,
-                `--emitSys=false`
-            );
+            runExternalTest(`../../07/StackArithmetic/SimpleAdd`);
         });
 
         it(`StackArithmetic/StackTest`, () => {
-            runExternalTest(
-                `../../07/StackArithmetic/SimpleAdd`,
-                `--emitSys=false`
-            );
+            runExternalTest(`../../07/StackArithmetic/SimpleAdd`);
         });
 
         it(`SimpleFunction`, () => {
@@ -1049,8 +1041,20 @@ describe(`vm compiler`, () => {
             runExternalTest(`../FunctionCalls/StaticsTest`);
         });
 
+        it(`NestedCall`, () => {
+            runExternalTest(`../FunctionCalls/NestedCall`);
+        });
+
         it(`FibonacciElement`, () => {
             runExternalTest(`../FunctionCalls/FibonacciElement`);
+        });
+
+        it(`BasicLoop`, () => {
+            runExternalTest(`../ProgramFlow/BasicLoop`);
+        });
+
+        it(`FibonacciSeries`, () => {
+            runExternalTest(`../ProgramFlow/FibonacciSeries`);
         });
 
         function runExternalTest(path: string, ...flags: string[]) {

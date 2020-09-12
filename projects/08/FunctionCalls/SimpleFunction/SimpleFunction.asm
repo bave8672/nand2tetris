@@ -1,5 +1,4 @@
 // Compiled VM code -> hack
-// {"config":{"emitSys":false}}
 // init SP
 @256
 D=A
@@ -104,15 +103,10 @@ A=D-A
 D=M
 @R14
 M=D
-@ARG
-A=M
-D=A
-@R13
-M=D
 @SP
 AM=M-1
 D=M
-@R13
+@ARG
 A=M
 M=D
 @ARG
