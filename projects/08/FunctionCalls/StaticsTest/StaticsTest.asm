@@ -5,54 +5,8 @@ D=A
 @SP
 A=D
 // Call Sys.init()
-@return-address.0
-D=A
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@LCL
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@ARG
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@THIS
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@THAT
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@SP
-D=M
-@5
-D=D-A
-@ARG
-M=D
-@SP
-D=M
-@LCL
-M=D
-@Sys.init
+@Sys.vm.Sys.init
 0;JMP
-(return-address.0)
 // Class1.vm:7 function Class1.set 0
 (Class1.vm.Class1.set)
 // Class1.vm:8 push argument 0
@@ -402,7 +356,7 @@ M=D
 @SP
 AM=M+1
 // Sys.vm:11 call Class1.set 2
-@return-address.1
+@return-address.0
 D=A
 @SP
 A=M
@@ -449,7 +403,7 @@ D=M
 M=D
 @Class1.set
 0;JMP
-(return-address.1)
+(return-address.0)
 // Sys.vm:12 pop temp 0 // Dumps the return value
 @5
 D=A
@@ -478,7 +432,7 @@ M=D
 @SP
 AM=M+1
 // Sys.vm:15 call Class2.set 2
-@return-address.2
+@return-address.1
 D=A
 @SP
 A=M
@@ -525,7 +479,7 @@ D=M
 M=D
 @Class2.set
 0;JMP
-(return-address.2)
+(return-address.1)
 // Sys.vm:16 pop temp 0 // Dumps the return value
 @5
 D=A
@@ -538,7 +492,7 @@ D=M
 A=M
 M=D
 // Sys.vm:17 call Class1.get 0
-@return-address.3
+@return-address.2
 D=A
 @SP
 A=M
@@ -585,9 +539,9 @@ D=M
 M=D
 @Class1.get
 0;JMP
-(return-address.3)
+(return-address.2)
 // Sys.vm:18 call Class2.get 0
-@return-address.4
+@return-address.3
 D=A
 @SP
 A=M
@@ -634,7 +588,7 @@ D=M
 M=D
 @Class2.get
 0;JMP
-(return-address.4)
+(return-address.3)
 // Sys.vm:19 label WHILE
 (Sys.vm.$WHILE)
 // Sys.vm:20 goto WHILE

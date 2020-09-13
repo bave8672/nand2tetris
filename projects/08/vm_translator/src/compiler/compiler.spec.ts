@@ -1030,7 +1030,7 @@ describe(`vm compiler`, () => {
         });
 
         it(`StackArithmetic/StackTest`, () => {
-            runExternalTest(`../../07/StackArithmetic/SimpleAdd`);
+            runExternalTest(`../../07/StackArithmetic/StackTest`);
         });
 
         it(`SimpleFunction`, () => {

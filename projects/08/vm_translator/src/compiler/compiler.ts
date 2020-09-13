@@ -529,10 +529,11 @@ export class Compiler {
         yield `A=D\n`;
         if (this.emitSys) {
             yield `// Call Sys.init()\n`;
-            yield* this.emitCallCommand({
-                name: "Sys.init",
-                arguments: 0,
-            });
+            yield* this.jump("Sys.vm.Sys.init");
+            // yield* this.emitCallCommand({
+            //     name: "Sys.vm.Sys.init",
+            //     arguments: 0,
+            // });
         }
     }
 

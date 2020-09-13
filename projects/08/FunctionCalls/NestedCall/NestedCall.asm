@@ -5,54 +5,8 @@ D=A
 @SP
 A=D
 // Call Sys.init()
-@return-address.0
-D=A
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@LCL
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@ARG
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@THIS
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@THAT
-D=M
-@SP
-A=M
-M=D
-@SP
-AM=M+1
-@SP
-D=M
-@5
-D=D-A
-@ARG
-M=D
-@SP
-D=M
-@LCL
-M=D
-@Sys.init
+@Sys.vm.Sys.init
 0;JMP
-(return-address.0)
 // Sys.vm:8 function Sys.init 0
 (Sys.vm.Sys.init)
 // Sys.vm:9 push constant 4000	// test THIS and THAT context save
@@ -94,7 +48,7 @@ D=M
 A=M
 M=D
 // Sys.vm:13 call Sys.main 0
-@return-address.1
+@return-address.0
 D=A
 @SP
 A=M
@@ -141,7 +95,7 @@ D=M
 M=D
 @Sys.main
 0;JMP
-(return-address.1)
+(return-address.0)
 // Sys.vm:14 pop temp 1
 @6
 D=A
@@ -308,7 +262,7 @@ M=D
 @SP
 AM=M+1
 // Sys.vm:38 call Sys.add12 1
-@return-address.2
+@return-address.1
 D=A
 @SP
 A=M
@@ -355,7 +309,7 @@ D=M
 M=D
 @Sys.add12
 0;JMP
-(return-address.2)
+(return-address.1)
 // Sys.vm:39 pop temp 0
 @5
 D=A
