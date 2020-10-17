@@ -3,9 +3,9 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // SimpleFunction.vm:7 function SimpleFunction.test 2
-(SimpleFunction.vm.SimpleFunction.test)
+(SimpleFunction.test)
 @0
 D=A
 @SP

@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // BasicTest.vm:7 push constant 10
 @10
 D=A

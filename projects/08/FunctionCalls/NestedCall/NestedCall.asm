@@ -3,12 +3,58 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // Call Sys.init()
-@Sys.vm.Sys.init
+@return-address.0
+D=A
+@SP
+A=M
+M=D
+@SP
+AM=M+1
+@LCL
+D=M
+@SP
+A=M
+M=D
+@SP
+AM=M+1
+@ARG
+D=M
+@SP
+A=M
+M=D
+@SP
+AM=M+1
+@THIS
+D=M
+@SP
+A=M
+M=D
+@SP
+AM=M+1
+@THAT
+D=M
+@SP
+A=M
+M=D
+@SP
+AM=M+1
+@SP
+D=M
+@5
+D=D-A
+@ARG
+M=D
+@SP
+D=M
+@LCL
+M=D
+@Sys.init
 0;JMP
+(return-address.0)
 // Sys.vm:8 function Sys.init 0
-(Sys.vm.Sys.init)
+(Sys.init)
 // Sys.vm:9 push constant 4000	// test THIS and THAT context save
 @4000
 D=A
@@ -48,7 +94,7 @@ D=M
 A=M
 M=D
 // Sys.vm:13 call Sys.main 0
-@return-address.0
+@return-address.1
 D=A
 @SP
 A=M
@@ -95,7 +141,7 @@ D=M
 M=D
 @Sys.main
 0;JMP
-(return-address.0)
+(return-address.1)
 // Sys.vm:14 pop temp 1
 @6
 D=A
@@ -108,12 +154,12 @@ D=M
 A=M
 M=D
 // Sys.vm:15 label LOOP
-(Sys.vm.$LOOP)
+(Sys.init$LOOP)
 // Sys.vm:16 goto LOOP
-@Sys.vm.$LOOP
+@Sys.init$LOOP
 0;JMP
 // Sys.vm:26 function Sys.main 5
-(Sys.vm.Sys.main)
+(Sys.main)
 @0
 D=A
 @SP
@@ -262,7 +308,7 @@ M=D
 @SP
 AM=M+1
 // Sys.vm:38 call Sys.add12 1
-@return-address.1
+@return-address.2
 D=A
 @SP
 A=M
@@ -309,7 +355,7 @@ D=M
 M=D
 @Sys.add12
 0;JMP
-(return-address.1)
+(return-address.2)
 // Sys.vm:39 pop temp 0
 @5
 D=A
@@ -454,7 +500,7 @@ M=D
 A=M
 0;JMP
 // Sys.vm:55 function Sys.add12 0
-(Sys.vm.Sys.add12)
+(Sys.add12)
 // Sys.vm:56 push constant 4002
 @4002
 D=A

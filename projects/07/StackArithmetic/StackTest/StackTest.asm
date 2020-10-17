@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // StackTest.vm:8 push constant 17
 @17
 D=A

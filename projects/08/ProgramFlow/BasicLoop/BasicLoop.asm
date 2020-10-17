@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // BasicLoop.vm:9 push constant 0    
 @0
 D=A
@@ -25,7 +25,7 @@ D=M
 A=M
 M=D
 // BasicLoop.vm:11 label LOOP_START
-(BasicLoop.vm.$LOOP_START)
+(anonymous$LOOP_START)
 // BasicLoop.vm:12 push argument 0    
 @ARG
 A=M
@@ -116,7 +116,7 @@ AM=M+1
 @SP
 AM=M-1
 D=M
-@BasicLoop.vm.$LOOP_START
+@anonymous$LOOP_START
 D;JNE
 // BasicLoop.vm:22 push local 0
 @LCL

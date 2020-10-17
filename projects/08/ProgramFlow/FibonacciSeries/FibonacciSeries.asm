@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // FibonacciSeries.vm:11 push argument 1
 @ARG
 D=M
@@ -107,7 +107,7 @@ D=M
 A=M
 M=D
 // FibonacciSeries.vm:24 label MAIN_LOOP_START
-(FibonacciSeries.vm.$MAIN_LOOP_START)
+(anonymous$MAIN_LOOP_START)
 // FibonacciSeries.vm:26 push argument 0
 @ARG
 A=M
@@ -121,13 +121,13 @@ AM=M+1
 @SP
 AM=M-1
 D=M
-@FibonacciSeries.vm.$COMPUTE_ELEMENT
+@anonymous$COMPUTE_ELEMENT
 D;JNE
 // FibonacciSeries.vm:28 goto END_PROGRAM        // otherwise, goto END_PROGRAM
-@FibonacciSeries.vm.$END_PROGRAM
+@anonymous$END_PROGRAM
 0;JMP
 // FibonacciSeries.vm:30 label COMPUTE_ELEMENT
-(FibonacciSeries.vm.$COMPUTE_ELEMENT)
+(anonymous$COMPUTE_ELEMENT)
 // FibonacciSeries.vm:32 push that 0
 @THAT
 A=M
@@ -246,7 +246,7 @@ D=M
 A=M
 M=D
 // FibonacciSeries.vm:47 goto MAIN_LOOP_START
-@FibonacciSeries.vm.$MAIN_LOOP_START
+@anonymous$MAIN_LOOP_START
 0;JMP
 // FibonacciSeries.vm:49 label END_PROGRAM
-(FibonacciSeries.vm.$END_PROGRAM)
+(anonymous$END_PROGRAM)

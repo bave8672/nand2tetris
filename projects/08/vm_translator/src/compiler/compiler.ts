@@ -380,12 +380,8 @@ export class Compiler {
         yield* this.incrementStackPointer();
     }
 
-    private buildFunctionLabel(functionName: string): string {
-        return `${this.fileName}.${functionName}`;
-    }
-
     private buildLabel(labelName: string): string {
-        return `${this.buildFunctionLabel(this.functionName)}$${labelName}`;
+        return `${this.functionName}$${labelName}`;
     }
 
     private *emitLabelCommand(label: string): Iterable<string> {
@@ -403,8 +399,9 @@ export class Compiler {
     }
 
     private *emitFunctionCommand(command: FunctionCommand): Iterable<string> {
+        this.functionName = command.name;
         // (f)
-        yield `(${this.buildFunctionLabel(command.name)})\n`;
+        yield `(${this.functionName})\n`;
         // initialise k local variables to 0
         const pushCommand: MemoryAccessCommand = {
             type: MemoryAccessCommandType.Push,
@@ -526,29 +523,30 @@ export class Compiler {
         yield `@256\n`;
         yield `D=A\n`;
         yield `@SP\n`;
-        yield `A=D\n`;
+        yield `M=D\n`;
         if (this.emitSys) {
             yield `// Call Sys.init()\n`;
-            yield* this.jump("Sys.vm.Sys.init");
-            // yield* this.emitCallCommand({
-            //     name: "Sys.vm.Sys.init",
-            //     arguments: 0,
-            // });
+            // yield* this.jump("Sys.init");
+            yield* this.emitCallCommand({
+                name: "Sys.init",
+                arguments: 0,
+            });
         }
     }
 
     private emitSys: boolean = false;
     private fileName: string = "";
     private lineNumber = 0;
-    private functionName: string = "";
+    private functionName: string = "anonymous";
     private commandId = 0;
     private callId = 0;
 
     private *compileLine(line: string): Iterable<string> {
+        this.lineNumber++;
+        console.log({ line, stack: this.functionName });
         this.consoleReplaceLine(
             `Compiling ${this.fileName}#${this.lineNumber}`
         );
-        this.lineNumber++;
         if (EMPTY_PATTERN.test(line) || COMMENT_PATTERN.test(line)) {
             return;
         }

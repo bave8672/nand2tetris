@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // SimpleAdd.vm:7 push constant 7
 @7
 D=A

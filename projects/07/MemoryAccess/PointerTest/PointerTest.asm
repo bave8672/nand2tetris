@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // PointerTest.vm:8 push constant 3030
 @3030
 D=A

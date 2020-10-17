@@ -3,7 +3,7 @@
 @256
 D=A
 @SP
-A=D
+M=D
 // StaticTest.vm:7 push constant 111
 @111
 D=A

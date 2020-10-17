@@ -9,6 +9,8 @@
         "start": "node ./built/cli/cli.js",
         "FibonacciElement": "node ./built/cli/cli.js --in ../FunctionCalls/FibonacciElement/**/*.vm --out ../FunctionCalls/FibonacciElement/FibonacciElement.asm",
         "SimpleFunction": "node ./built/cli/cli.js --in ../FunctionCalls/SimpleFunction/**/*.vm --out ../FunctionCalls/SimpleFunction/SimpleFunction.asm",
+        "StaticsTest": "node ./built/cli/cli.js --in ../FunctionCalls/StaticsTest/**/*.vm --out ../FunctionCalls/StaticsTest/StaticsTest.asm",
+        "BasicLoop": "node ./built/cli/cli.js --in ../ProgramFlow/BasicLoop/**/*.vm --out ../ProgramFlow/BasicLoop/BasicLoop.asm",
         "CPUEmulator": "bash  ../../../tools/CPUEmulator.sh",
         "VMEmulator": "bash  ../../../tools/VMEmulator.sh"
     },
