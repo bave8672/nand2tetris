@@ -1,8 +1,10 @@
+// Compiled VM code -> hack
+// init SP
 @256
 D=A
 @SP
-A=D
-// StackTest:8 push constant 17
+M=D
+// StackTest.vm:8 push constant 17
 @17
 D=A
 @SP
@@ -10,7 +12,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:9 push constant 17
+// StackTest.vm:9 push constant 17
 @17
 D=A
 @SP
@@ -18,7 +20,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:10 eq
+// StackTest.vm:10 eq
 @SP
 AM=M-1
 D=M
@@ -40,7 +42,7 @@ M=-1
 (EQ.0.end)
 @SP
 AM=M+1
-// StackTest:11 push constant 17
+// StackTest.vm:11 push constant 17
 @17
 D=A
 @SP
@@ -48,7 +50,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:12 push constant 16
+// StackTest.vm:12 push constant 16
 @16
 D=A
 @SP
@@ -56,7 +58,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:13 eq
+// StackTest.vm:13 eq
 @SP
 AM=M-1
 D=M
@@ -78,7 +80,7 @@ M=-1
 (EQ.1.end)
 @SP
 AM=M+1
-// StackTest:14 push constant 16
+// StackTest.vm:14 push constant 16
 @16
 D=A
 @SP
@@ -86,7 +88,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:15 push constant 17
+// StackTest.vm:15 push constant 17
 @17
 D=A
 @SP
@@ -94,7 +96,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:16 eq
+// StackTest.vm:16 eq
 @SP
 AM=M-1
 D=M
@@ -116,7 +118,7 @@ M=-1
 (EQ.2.end)
 @SP
 AM=M+1
-// StackTest:17 push constant 892
+// StackTest.vm:17 push constant 892
 @892
 D=A
 @SP
@@ -124,7 +126,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:18 push constant 891
+// StackTest.vm:18 push constant 891
 @891
 D=A
 @SP
@@ -132,7 +134,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:19 lt
+// StackTest.vm:19 lt
 @SP
 AM=M-1
 D=M
@@ -154,7 +156,7 @@ M=-1
 (LT.3.end)
 @SP
 AM=M+1
-// StackTest:20 push constant 891
+// StackTest.vm:20 push constant 891
 @891
 D=A
 @SP
@@ -162,7 +164,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:21 push constant 892
+// StackTest.vm:21 push constant 892
 @892
 D=A
 @SP
@@ -170,7 +172,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:22 lt
+// StackTest.vm:22 lt
 @SP
 AM=M-1
 D=M
@@ -192,7 +194,7 @@ M=-1
 (LT.4.end)
 @SP
 AM=M+1
-// StackTest:23 push constant 891
+// StackTest.vm:23 push constant 891
 @891
 D=A
 @SP
@@ -200,7 +202,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:24 push constant 891
+// StackTest.vm:24 push constant 891
 @891
 D=A
 @SP
@@ -208,7 +210,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:25 lt
+// StackTest.vm:25 lt
 @SP
 AM=M-1
 D=M
@@ -230,7 +232,7 @@ M=-1
 (LT.5.end)
 @SP
 AM=M+1
-// StackTest:26 push constant 32767
+// StackTest.vm:26 push constant 32767
 @32767
 D=A
 @SP
@@ -238,7 +240,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:27 push constant 32766
+// StackTest.vm:27 push constant 32766
 @32766
 D=A
 @SP
@@ -246,7 +248,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:28 gt
+// StackTest.vm:28 gt
 @SP
 AM=M-1
 D=M
@@ -268,7 +270,7 @@ M=-1
 (GT.6.end)
 @SP
 AM=M+1
-// StackTest:29 push constant 32766
+// StackTest.vm:29 push constant 32766
 @32766
 D=A
 @SP
@@ -276,7 +278,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:30 push constant 32767
+// StackTest.vm:30 push constant 32767
 @32767
 D=A
 @SP
@@ -284,7 +286,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:31 gt
+// StackTest.vm:31 gt
 @SP
 AM=M-1
 D=M
@@ -306,7 +308,7 @@ M=-1
 (GT.7.end)
 @SP
 AM=M+1
-// StackTest:32 push constant 32766
+// StackTest.vm:32 push constant 32766
 @32766
 D=A
 @SP
@@ -314,7 +316,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:33 push constant 32766
+// StackTest.vm:33 push constant 32766
 @32766
 D=A
 @SP
@@ -322,7 +324,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:34 gt
+// StackTest.vm:34 gt
 @SP
 AM=M-1
 D=M
@@ -344,7 +346,7 @@ M=-1
 (GT.8.end)
 @SP
 AM=M+1
-// StackTest:35 push constant 57
+// StackTest.vm:35 push constant 57
 @57
 D=A
 @SP
@@ -352,7 +354,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:36 push constant 31
+// StackTest.vm:36 push constant 31
 @31
 D=A
 @SP
@@ -360,7 +362,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:37 push constant 53
+// StackTest.vm:37 push constant 53
 @53
 D=A
 @SP
@@ -368,7 +370,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:38 add
+// StackTest.vm:38 add
 @SP
 AM=M-1
 D=M
@@ -377,7 +379,7 @@ AM=M-1
 M=D+M
 @SP
 AM=M+1
-// StackTest:39 push constant 112
+// StackTest.vm:39 push constant 112
 @112
 D=A
 @SP
@@ -385,7 +387,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:40 sub
+// StackTest.vm:40 sub
 @SP
 AM=M-1
 D=M
@@ -394,13 +396,13 @@ AM=M-1
 M=M-D
 @SP
 AM=M+1
-// StackTest:41 neg
+// StackTest.vm:41 neg
 @SP
 AM=M-1
 M=-M
 @SP
 AM=M+1
-// StackTest:42 and
+// StackTest.vm:42 and
 @SP
 AM=M-1
 D=M
@@ -409,7 +411,7 @@ AM=M-1
 M=D&M
 @SP
 AM=M+1
-// StackTest:43 push constant 82
+// StackTest.vm:43 push constant 82
 @82
 D=A
 @SP
@@ -417,7 +419,7 @@ A=M
 M=D
 @SP
 AM=M+1
-// StackTest:44 or
+// StackTest.vm:44 or
 @SP
 AM=M-1
 D=M
@@ -426,7 +428,7 @@ AM=M-1
 M=D|M
 @SP
 AM=M+1
-// StackTest:45 not
+// StackTest.vm:45 not
 @SP
 AM=M-1
 M=!M
