@@ -1,0 +1,10 @@
+class Assembler {
+    constructor Assambler new() {
+        return this;
+    }
+    
+    method void assemble() {
+        do Ouput.printString("TODO!");
+        return;
+    }
+}

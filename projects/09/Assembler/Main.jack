@@ -1,0 +1,8 @@
+class Main {
+    function void main() {
+        var Assembler assembler;
+        let assembler = Assembler.new();
+        assembler.assemble();
+        return;
+    }
+}
