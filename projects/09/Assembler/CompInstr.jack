@@ -1,0 +1,90 @@
+class CompInstr {
+    function String MapMnm(String mnm) {
+        if (mnm = CompMnm.Zero()) {
+            return "0101010";
+        }
+        if (mnm = CompMnm.One()) {
+            return "0111111";
+        }
+        if (mnm = CompMnm.MinusOne()) {
+            return "0111010";
+        }
+        if (mnm = CompMnm.D()) {
+            return "0001100";
+        }
+        if (mnm = CompMnm.A()) {
+            return "0110000";
+        }
+        if (mnm = CompMnm.M()) {
+            return "1110000";
+        }
+        if (mnm = CompMnm.NotD()) {
+            return "0001101";
+        }
+        if (mnm = CompMnm.NotA()) {
+            return "0110001";
+        }
+        if (mnm = CompMnm.NotM()) {
+            return "1110001";
+        }
+        if (mnm = CompMnm.NegD()) {
+            return "0001111";
+        }
+        if (mnm = CompMnm.NegA()) {
+            return "0110011";
+        }
+        if (mnm = CompMnm.NegM()) {
+            return "1110011";
+        }
+        if (mnm = CompMnm.DPlus1()) {
+            return "0011111";
+        }
+        if (mnm = CompMnm.APlus1()) {
+            return "0110111";
+        }
+        if (mnm = CompMnm.MPlus1()) {
+            return "1110111";
+        }
+        if (mnm = CompMnm.DMinus1()) {
+            return "0001110";
+        }
+        if (mnm = CompMnm.AMinus1()) {
+            return "0110010";
+        }
+        if (mnm = CompMnm.MMinus1()) {
+            return "1110010";
+        }
+        if (mnm = CompMnm.DPlusA()) {
+            return "0000010";
+        }
+        if (mnm = CompMnm.DPlusM()) {
+            return "1000010";
+        }
+        if (mnm = CompMnm.DMinusA()) {
+            return "0010011";
+        }
+        if (mnm = CompMnm.DMinusM()) {
+            return "1010011";
+        }
+        if (mnm = CompMnm.AMinusD()) {
+            return "0000111";
+        }
+        if (mnm = CompMnm.MMinusD()) {
+            return "1000111";
+        }
+        if (mnm = CompMnm.DAndA()) {
+            return "0000000";
+        }
+        if (mnm = CompMnm.DAndM()) {
+            return "1000000";
+        }
+        if (mnm = CompMnm.DOrA()) {
+            return "0010101";
+        }
+        if (mnm = CompMnm.DOrM()) {
+            return "1010101";
+        }
+        // default to zero
+        return "0101010";
+    }
+}

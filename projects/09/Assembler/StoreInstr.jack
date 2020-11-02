@@ -1,0 +1,26 @@
+class StoreInstr {
+    function String mapMnm(String mnm) {
+        if (mnm = StoreMnm.M()) {
+            return "001";
+        }
+        if (mnm = StoreMnm.D()) {
+            return "010";
+        }
+        if (mnm = StoreMnm.MD()) {
+            return "011";
+        }
+        if (mnm = StoreMnm.A()) {
+            return "100";
+        }
+        if (mnm = StoreMnm.AM()) {
+            return "101";
+        }
+        if (mnm = StoreMnm.AD()) {
+            return "110";
+        }
+        if (mnm = StoreMnm.AMD()) {
+            return "111";
+        }
+        return "000";
+    }
+}

@@ -1,10 +1,19 @@
 class Assembler {
-    constructor Assambler new() {
+    field int count;
+
+    constructor Assembler new() {
+        let count = 0;
         return this;
     }
     
     method void assemble() {
-        do Ouput.printString("TODO!");
+        do Output.printString("TODO!");
+        do Output.println();      // New line
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
         return;
     }
 }

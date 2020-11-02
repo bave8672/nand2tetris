@@ -1,0 +1,9 @@
+class InstructionType {
+    function char A() {
+        return "A";
+    }
+
+    function char B() {
+        return "B";
+    }
+}

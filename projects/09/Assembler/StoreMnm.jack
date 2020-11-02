@@ -1,0 +1,23 @@
+class StoreMnm {
+    function String M() {
+        return "M";
+    }
+    function String D() {
+        return "D";
+    }
+    function String MD() {
+        return "MD";
+    }
+    function String A() {
+        return "A";
+    }
+    function String AM() {
+        return "AM";
+    }
+    function String AD() {
+        return "AD";
+    }
+    function String AMD() {
+        return "AMD";
+    }
+}

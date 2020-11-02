@@ -2,7 +2,8 @@ class Main {
     function void main() {
         var Assembler assembler;
         let assembler = Assembler.new();
-        assembler.assemble();
+        do assembler.assemble();
+        do assembler.dispose();
         return;
     }
 }

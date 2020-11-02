@@ -1,0 +1,26 @@
+class JumpInstr {
+    function String mapMnm(String mnm) {
+        if (mnm = JumpMnm.JGT()) {
+            return "001";
+        }
+        if (mnm = JumpMnm.JEQ()) {
+            return "010";
+        }
+        if (mnm = JumpMnm.JGE()) {
+            return "011";
+        }
+        if (mnm = JumpMnm.JLT()) {
+            return "100";
+        }
+        if (mnm = JumpMnm.JNE()) {
+            return "101";
+        }
+        if (mnm = JumpMnm.JLE()) {
+            return "110";
+        }
+        if (mnm = JumpMnm.JMP()) {
+            return "111";
+        }
+        return "000";
+    }
+}

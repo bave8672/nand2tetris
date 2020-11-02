@@ -1,0 +1,24 @@
+class CInstruction {
+    field String store;
+    field String comp;
+    field String jump;
+
+    constructor CInstruction new(String s, String c, String j) {
+        let store = s;
+        let comp = c;
+        let jump = j;
+        return this;
+    }
+
+    method String getStore() {
+        return store;
+    }
+
+    method String getComp() {
+        return comp;
+    }
+
+    method String getJump() {
+        return jump;
+    }
+}

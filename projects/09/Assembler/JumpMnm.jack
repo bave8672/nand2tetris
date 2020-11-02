@@ -1,0 +1,23 @@
+class JumpMnm {
+    function String JLT() {
+        return "JLT";
+    }
+    function String JLE() {
+        return "JLE";
+    }
+    function String JEQ() {
+        return "JEQ";
+    }
+    function String JGE() {
+        return "JGE";
+    }
+    function String JGT() {
+        return "JGT";
+    }
+    function String JNE() {
+        return "JNE";
+    }
+    function String JMP() {
+        return "JMP";
+    }
+}

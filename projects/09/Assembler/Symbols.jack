@@ -1,0 +1,67 @@
+class Symbols {
+    field Array symbols;
+    field int nextIndex;
+    field int nextAddress;
+
+    constructor Symbols new() {
+        let symbols = Array.new(256);
+        let nextIndex = 0;
+        do add("R0", 0);
+        do add("R1", 1);
+        do add("R2", 2);
+        do add("R3", 3);
+        do add("R4", 4);
+        do add("R5", 5);
+        do add("R6", 6);
+        do add("R7", 7);
+        do add("R8", 8);
+        do add("R9", 9);
+        do add("R10", 10);
+        do add("R11", 11);
+        do add("R12", 12);
+        do add("R13", 13);
+        do add("R14", 14);
+        do add("R15", 15);
+        do add("SP", 0);
+        do add("LCL", 1);
+        do add("ARG", 2);
+        do add("THIS", 3);
+        do add("THAT", 4);
+        do add("SCREEN", 1024);
+        do add("KBD", 24576);
+        let nextAddress = 16;
+        return this;
+    }
+
+    method void add(String symbol, int address) {
+        var Array sym;
+        let sym = Array.new(2);
+        let sym[0] = symbol;
+        let sym[1] = address;
+        let symbols[nextIndex] = sym;
+        let nextIndex = nextIndex + 1;
+        return;
+    }
+
+    method int allocate(String symbol) {
+        do add(symbol, nextAddress);
+        let nextAddress = nextAddress + 1;
+        return nextAddress - 1;
+    }
+
+    method int get(String symbol) {
+        var int i;
+        var Array symbolI;
+        var int address;
+        let i = 0;
+        while (i < nextIndex) {
+            let symbolI = symbols[i];
+            if (symbol = symbolI[0]) {
+                return symbolI[1];
+            }
+            let i = i + 1;
+        }
+        let address = allocate(symbol);
+        return address;
+    }
+}
