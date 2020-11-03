@@ -61,7 +61,12 @@ class Symbols {
             }
             let i = i + 1;
         }
-        let address = allocate(symbol);
-        return address;
+        return allocate(symbol);
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(symbols);
+        do Memory.deAlloc(this);
+        return;
     }
 }

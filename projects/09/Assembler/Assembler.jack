@@ -1,18 +1,21 @@
 class Assembler {
-    field int count;
+    field Symbols symbols;
+    field Array pass1;
+    field Array instructions;
 
     constructor Assembler new() {
-        let count = 0;
+        let symbols = Symbols.new();
         return this;
     }
     
-    method void assemble() {
+    method Array assemble(Array lines) {
         do Output.printString("TODO!");
         do Output.println();      // New line
         return;
     }
 
     method void dispose() {
+        do Memory.deAlloc(symbols);
         do Memory.deAlloc(this);
         return;
     }
