@@ -1,0 +1,33 @@
+class SnakeGame {
+    field Snake snake;
+
+    constructor SnakeGame new() {
+        let snake = Snake.new();
+        return this;
+    }
+
+    method void run() {
+        while (true) {
+            var int key;
+            let key = Keyboard.keyPressed();
+            if (key = Global.QUIT) {
+                return;
+            }
+            do gameFrame();
+       }
+       return;
+    }
+
+    method void gameFrame() {
+        do snake.erase();
+        do snake.move(Keyboard.keyPressed());
+        do Sys.wait(500);
+        return;
+    }
+
+    method void dispose() {
+        do snake.dispose();
+        do Memory.deAlloc(this);
+        return;
+     }
+}

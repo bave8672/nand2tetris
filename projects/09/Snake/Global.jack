@@ -1,0 +1,26 @@
+class Global {
+    static int QUIT;
+    static int RIGHT;
+    static int UP;
+    static int LEFT;
+    static int DOWN;
+    static int SCREEN_WIDTH;
+    static int SCREEN_HEIGHT;
+    static int BLOCK_SIZE;
+    static int SCREEN_HEIGHT_SUB_1;
+    static int SCREEN_WIDTH_SUB_1;
+
+    constructor Global new() {
+        let QUIT = 81; // q
+        let RIGHT = 68; // d
+        let UP = 87; // w
+        let LEFT = 65; // a
+        let DOWN = 83; //s
+        let SCREEN_WIDTH = 512;
+        let SCREEN_WIDTH = 512;
+        let SCREEN_HEIGHT_SUB_1 = 255;
+        let SCREEN_WIDTH_SUB_1 = 511;
+        let BLOCK_SIZE = 16;
+        return this;
+    }
+}

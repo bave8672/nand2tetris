@@ -1,0 +1,8 @@
+class Main {
+    function void main() {
+        var Game game;
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}
