@@ -1,26 +1,15 @@
 class Global {
-    static int QUIT;
-    static int RIGHT;
-    static int UP;
-    static int LEFT;
-    static int DOWN;
-    static int SCREEN_WIDTH;
-    static int SCREEN_HEIGHT;
-    static int BLOCK_SIZE;
-    static int SCREEN_HEIGHT_SUB_1;
-    static int SCREEN_WIDTH_SUB_1;
-
-    constructor Global new() {
-        let QUIT = 81; // q
-        let RIGHT = 68; // d
-        let UP = 87; // w
-        let LEFT = 65; // a
-        let DOWN = 83; //s
-        let SCREEN_WIDTH = 512;
-        let SCREEN_WIDTH = 512;
-        let SCREEN_HEIGHT_SUB_1 = 255;
-        let SCREEN_WIDTH_SUB_1 = 511;
-        let BLOCK_SIZE = 16;
-        return this;
-    }
+    function boolean DEBUG() { return false; }
+    function int FRAME_TIME() { return 200; }
+    function int QUIT() { return 81; } // q
+    function int RIGHT() { return 68; } // d
+    function int UP() { return 87; } // w
+    function int LEFT() { return 65; } // a
+    function int DOWN() { return 83; } //s
+    function int SCREEN_WIDTH() { return 512; }
+    function int SCREEN_HEIGHT() { return 256; }
+    function int SCREEN_WIDTH_SUB_1() { return 511; }
+    function int SCREEN_HEIGHT_SUB_1() { return 255; }
+    function int BLOCK_SIZE() { return 16; }
+    function int BLOCK_SIZE_SUB_1() { return 15; }
 }

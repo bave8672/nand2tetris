@@ -8,9 +8,7 @@ class SnakeGame {
 
     method void run() {
         while (true) {
-            var int key;
-            let key = Keyboard.keyPressed();
-            if (key = Global.QUIT) {
+            if (Keyboard.keyPressed() = Global.QUIT()) {
                 return;
             }
             do gameFrame();
@@ -21,7 +19,11 @@ class SnakeGame {
     method void gameFrame() {
         do snake.erase();
         do snake.move(Keyboard.keyPressed());
-        do Sys.wait(500);
+        if (Global.DEBUG()) {
+            do snake.print();
+        }
+        do snake.draw();
+        do Sys.wait(Global.FRAME_TIME());
         return;
     }
 
