@@ -1,5 +1,5 @@
 class Global {
-    function boolean DEBUG() { return false; }
+    function boolean DEBUG() { return true; }
     function int FRAME_TIME() { return 200; }
     function int QUIT() { return 81; } // q
     function int RIGHT() { return 68; } // d
@@ -12,4 +12,21 @@ class Global {
     function int SCREEN_HEIGHT_SUB_1() { return 255; }
     function int BLOCK_SIZE() { return 16; }
     function int BLOCK_SIZE_SUB_1() { return 15; }
+    function int BLOCK_SIZE_SUB_2() { return 14; }
+
+    function int modScreenX(int x) {
+        return x & Global.SCREEN_WIDTH_SUB_1();
+    }
+
+    function int modScreenY(int y) {
+        return y & Global.SCREEN_HEIGHT_SUB_1();
+    }
+
+    function int blockX(int seed) {
+        return Global.modScreenX(Global.BLOCK_SIZE() * seed);
+    }
+
+    function int blockY(int seed) {
+        return Global.modScreenY(Global.BLOCK_SIZE() * seed);
+    }
 }

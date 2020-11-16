@@ -10,38 +10,50 @@ class Assembler {
     
     method Array assemble(Array lines) {
         var int i;
+
         let pass1 = Array.new(10);
         let instructions = Array.new(10);
         let i = 0;
+
         while (lines[i] != null) {
             var String line;
             var Ainstruction aInstruction;
             var Cinstruction cInstruction;
+
             let line = lines[i];
-            let aInstruction = parseAinstruction()
+            let aInstruction = parseAinstruction(line);
+
             if (aInstruction) {
                 
             }
+
             let i = i + 1;
         }
-        return;
+
+        return instructions;
     }
 
     method Ainstruction parseAinstruction(String line) {
         var AInstructionParser aInstructionParser;
         var AInstruction aInstruction;
+
         let aInstructionParser = AInstructionParser.new();
         let aInstruction = aInstructionParser.parse(line);
+
         do aInstructionParser.dispose();
+
         return aInstruction;
     }
 
     method CInstruction parseCInstruction(String line) {
         var CInstructionParser cInstructionParser;
         var CInstruction cInstruction;
+
         let cInstructionParser = CInstructionParser.new();
         let cInstruction = cInstructionParser.parse(line);
+
         do cInstructionParser.dispose();
+
         return cInstruction;
     }
 

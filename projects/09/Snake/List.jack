@@ -9,15 +9,19 @@ class List {
     field List next;         // followed by a list
 
     /* Creates a List. */
-    constructor List new(int car) {
+    constructor List new(int car, List cda) {
         let data = car;       // the identifiers car and cdr are used in 
+        let next = cda;
         return this;
     }
 
     /** Accessors. */
     method int getData() { return data; }
     method int getNext() { return next; }
-    method void setNext(List next) { let next = next; return; }
+    method void setNext(List next) { 
+        let next = next; 
+        return; 
+    }
 
     /** Prints this list. */
     method void print() {
