@@ -107,7 +107,7 @@ class Snake {
         }
 
         // dispose of paths not included in the body of the snake
-        // if (~(p = null) & ~(p = path)) {
+        // if (~(p = null)) {
         //     do p.dispose();
         // }
         return;

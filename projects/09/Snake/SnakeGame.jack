@@ -6,8 +6,9 @@ class SnakeGame {
 
     constructor SnakeGame new() {
         let snake = Snake.new();
-        let seedX = 0;
-        let seedY = 0;
+        let seedX = 1;
+        let seedY = 1;
+        do updateSeeds();
         return this;
     }
 
@@ -48,28 +49,26 @@ class SnakeGame {
 
     method void onFoodEaten() {
         do snake.eat();
-        do food.dispose();
         do placeFood();
         return;
     }
 
     method void placeFood() {
-        var int x;
-        var int y;
-
         do updateSeeds();
         
         // place the food randomly until it doesn't intersect with the snake
-        let x = Global.blockX(seedX);
-        let y = Global.blockY(seedY);
-
-        while (snake.intersects(x, y)) {
-            do updateSeeds();
-            let x = Global.blockX(seedX);
-            let y = Global.blockY(seedY);
+        if (food = null) {
+            let food = Food.new(Global.blockX(seedX), Global.blockY(seedY));
         }
 
-        let food = Food.new(x, y);
+        while (snake.intersects(food.getX(), food.getY())) {
+            do updateSeeds();
+            do food.setX(Global.blockX(seedX));
+            do food.setY(Global.blockY(seedY));
+            if (Global.DEBUG()) {
+                do print();
+            }
+        }
 
         // render the food immediately - this only needs to be done once
         do food.draw();
@@ -77,8 +76,8 @@ class SnakeGame {
     }
 
     method void updateSeeds() {
-        let seedX = seedX + seedY + Keyboard.keyPressed() + 3;
-        let seedY = (seedX - seedY + 1) * (Keyboard.keyPressed() + 5);
+        let seedX = seedX + seedY + Keyboard.keyPressed() + 1;
+        let seedY = (seedX - seedY + 1) / (Keyboard.keyPressed() + 1);
         return;
     }
 
@@ -87,6 +86,7 @@ class SnakeGame {
         do Output.printInt(Global.blockX(seedX));
         do Output.printString(" SeedY: ");
         do Output.printInt(Global.blockY(seedY));
+        do Output.printString(" ");
         do Output.println();
         // do snake.print();
         do food.print();

@@ -18,8 +18,8 @@ class List {
     /** Accessors. */
     method int getData() { return data; }
     method int getNext() { return next; }
-    method void setNext(List next) { 
-        let next = next; 
+    method void setNext(List _next) { 
+        let next = _next; 
         return; 
     }
 
