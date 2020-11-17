@@ -1,0 +1,183 @@
+class Snake {
+    field int headX;
+    field int headY;
+    field List path;
+    field int direction;
+    field int length;
+
+    constructor Snake new() {
+        let headX = (Global.SCREEN_WIDTH() / 2);
+        let headY = (Global.SCREEN_HEIGHT() / 2);
+        let path = List.new(Global.RIGHT(), null);
+        let direction = Global.RIGHT();
+        let length = 1;
+        return this;
+    }
+
+    method int getHeadX() { return headX; }
+    method int getHeadY() { return headY; }
+
+    method void move(int dir) {
+        var boolean validDir;
+
+        let validDir = false;
+
+        // move the head coordinates
+        // and check for a valid direction
+        // (snake cannot move backwards)
+        if (dir = Global.RIGHT() & ~(direction = Global.LEFT())) {
+            let headX = Global.modScreenX(headX + Global.BLOCK_SIZE());
+            let validDir = true;
+        }
+        if (dir = Global.LEFT() & ~(direction = Global.RIGHT())) {
+            let headX = Global.modScreenX(headX - Global.BLOCK_SIZE());
+            let validDir = true;
+        }
+        if (dir = Global.DOWN() & ~(direction = Global.UP())) {
+            let headY = Global.modScreenY(headY + Global.BLOCK_SIZE());
+            let validDir = true;
+        }
+        if (dir = Global.UP() & ~(direction = Global.DOWN())) {
+            let headY = Global.modScreenY(headY - Global.BLOCK_SIZE());
+            let validDir = true;
+        }
+
+        // default case - move in current direction
+        if (~(validDir)) {
+            do move(direction);
+            return;
+        }
+
+        // set the direction
+        let direction = dir;
+
+        // push direction onto the head of the path
+        let path = List.new(dir, path);
+        return;
+    }
+
+    method void draw() {
+        do Screen.setColor(true);
+        do drawInCurrentColor();
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false);
+        do drawInCurrentColor();
+        return;
+    }
+
+    method void drawInCurrentColor() {
+        var int x; // current x
+        var int y; // current y
+        var List p; // current path segment
+        var int len; // path length counter
+
+        let x = headX;
+        let y = headY;
+        let p = path;
+        let len = 0;
+
+        // draw the head
+        do Screen.drawRectangle(x, y, x + Global.BLOCK_SIZE_SUB_2(), y + Global.BLOCK_SIZE_SUB_2());
+
+        // draw the paths backwards form the head
+        while ((len < length) & ~(p = null)) {
+            if (p.getData() = Global.DOWN()) {
+                // move backwards (up)
+                let y = Global.modScreenY(y - Global.BLOCK_SIZE());
+            }
+            if (p.getData() = Global.UP()) {
+                // move backwards (down)
+                let y = Global.modScreenY(y + Global.BLOCK_SIZE());
+            }
+            if (p.getData() = Global.LEFT()) {
+                // move backwards (right)
+                let x = Global.modScreenX(x + Global.BLOCK_SIZE());
+            }
+            if (p.getData() = Global.RIGHT()) {
+                // move backwards (left)
+                let x = Global.modScreenX(x - Global.BLOCK_SIZE());
+            }
+
+            do Screen.drawRectangle(x, y, x + Global.BLOCK_SIZE_SUB_2(), y + Global.BLOCK_SIZE_SUB_2());
+            let p = p.getNext();
+            let len = len + 1;
+        }
+
+        // dispose of paths not included in the body of the snake
+        // if (~(p = null)) {
+        //     do p.dispose();
+        // }
+        return;
+    }
+
+    method boolean intersects(int px, int py) {
+        var int x; // current x
+        var int y; // current y
+        var List p; // current path segment
+        var int len; // path length counter
+
+        let x = headX;
+        let y = headY;
+        let p = path;
+        let len = 0;
+
+        if ((x = px) & (y = py)) {
+            return true;
+        }
+
+        while ((len < length) & ~(p = null)) {
+            if (p.getData() = Global.DOWN()) {
+                // move backwards (up)
+                let y = Global.modScreenY(y - Global.BLOCK_SIZE());
+            }
+            if (p.getData() = Global.UP()) {
+                // move backwards (down)
+                let y = Global.modScreenY(y + Global.BLOCK_SIZE());
+            }
+            if (p.getData() = Global.LEFT()) {
+                // move backwards (right)
+                let x = Global.modScreenX(x + Global.BLOCK_SIZE());
+            }
+            if (p.getData() = Global.RIGHT()) {
+                // move backwards (left)
+                let x = Global.modScreenX(x - Global.BLOCK_SIZE());
+            }
+
+            if ((x = px) & (y = py)) {
+                return true;
+            }
+
+            let p = p.getNext();
+            let len = len + 1;
+        }
+
+        return false;
+    }
+
+    method void eat() {
+        let length = length + 1;
+        return;
+    }
+
+    method void print() {
+        do Output.printString("Snake x: ");
+        do Output.printInt(headX);
+        do Output.printString(" y: ");
+        do Output.printInt(headY);
+        do Output.printString(" length: ");
+        do Output.printInt(length);
+        do Output.printString(" path: ");
+        do path.print();
+        do Output.println();
+        return;
+    }
+
+    method void dispose() {
+        do path.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

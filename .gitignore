@@ -7,3 +7,4 @@ node_modules
 built
 *.asm.out
 coverage
+projects/09/**/*.vm

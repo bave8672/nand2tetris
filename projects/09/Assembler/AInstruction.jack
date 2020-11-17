@@ -1,0 +1,16 @@
+class AInstruction {
+    field Address address;
+
+    constructor AInstruction new(Address addr) {
+        let address = addr;
+        return this;
+    }
+    
+    method Address getAddress() {
+        return address;
+    }
+
+    method char getType() {
+        return InstructionType.A();
+    }
+}

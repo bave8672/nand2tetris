@@ -1,0 +1,86 @@
+class CompMnm {
+    function String Zero() {
+        return "Zero";
+    }
+    function String One() {
+        return "One";
+    }
+    function String MinusOne() {
+        return "MinusOne";
+    }
+    function String A() {
+        return "A";
+    }
+    function String D() {
+        return "D";
+    }
+    function String M() {
+        return "M";
+    }
+    function String NotA() {
+        return "NotA";
+    }
+    function String NotD() {
+        return "NotD";
+    }
+    function String NotM() {
+        return "NotM";
+    }
+    function String NegA() {
+        return "NegA";
+    }
+    function String NegD() {
+        return "NegD";
+    }
+    function String NegM() {
+        return "NegM";
+    }
+    function String APlus1() {
+        return "APlus1";
+    }
+    function String DPlus1() {
+        return "DPlus1";
+    }
+    function String MPlus1() {
+        return "MPlus1";
+    }
+    function String AMinus1() {
+        return "AMinus1";
+    }
+    function String DMinus1() {
+        return "DMinus1";
+    }
+    function String MMinus1() {
+        return "MMinus1";
+    }
+    function String DPlusA() {
+        return "DPlusA";
+    }
+    function String DPlusM() {
+        return "DPlusM";
+    }
+    function String DMinusA() {
+        return "DMinusA";
+    }
+    function String DMinusM() {
+        return "DMinusM";
+    }
+    function String AMinusD() {
+        return "AMinusD";
+    }
+    function String MMinusD() {
+        return "MMinusD";
+    }
+    function String DAndA() {
+        return "DAndA";
+    }
+    function String DAndM() {
+        return "DAndM";
+    }
+    function String DOrA() {
+        return "DOrA";
+    }
+    function String DOrM() {
+        return "DOrM";
+    }
+}

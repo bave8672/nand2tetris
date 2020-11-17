@@ -1,0 +1,9 @@
+class MInstructionParser {
+    constructor MInstructionParser new() {
+        return this;
+    }
+
+    method MInstruction parse(String line) {
+        
+    }
+}

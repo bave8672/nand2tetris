@@ -1,0 +1,15 @@
+class Address {
+    field int address;
+    field String name;
+
+    constructor Address new(int addr, String nom) {
+        let address = addr;
+        let name = nom;
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

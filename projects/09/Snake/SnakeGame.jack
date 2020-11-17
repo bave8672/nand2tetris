@@ -1,0 +1,102 @@
+class SnakeGame {
+    field Snake snake;
+    field Food food;
+    field int seedX;
+    field int seedY;
+
+    constructor SnakeGame new() {
+        let snake = Snake.new();
+        let seedX = 1;
+        let seedY = 1;
+        do updateSeeds();
+        return this;
+    }
+
+    method void run() {
+        while (true) {
+            if (Keyboard.keyPressed() = Global.QUIT()) {
+                return;
+            }
+            do gameFrame();
+       }
+       return;
+    }
+
+    method void gameFrame() {
+        // place food
+        do placeFood();
+
+        // move the snake
+        do snake.erase();
+        do snake.move(Keyboard.keyPressed());
+
+        // check for eat food
+        if (snake.intersects(food.getX(), food.getY())) {
+            do onFoodEaten();
+        }
+
+        // draw
+        do snake.draw();
+
+        if (Global.DEBUG()) {
+            do print();
+        }
+
+        // wait
+        do Sys.wait(Global.FRAME_TIME());
+        return;
+    }
+
+    method void onFoodEaten() {
+        do snake.eat();
+        do placeFood();
+        return;
+    }
+
+    method void placeFood() {
+        do updateSeeds();
+        
+        // place the food randomly until it doesn't intersect with the snake
+        if (food = null) {
+            let food = Food.new(Global.blockX(seedX), Global.blockY(seedY));
+        }
+
+        while (snake.intersects(food.getX(), food.getY())) {
+            do updateSeeds();
+            do food.setX(Global.blockX(seedX));
+            do food.setY(Global.blockY(seedY));
+            if (Global.DEBUG()) {
+                do print();
+            }
+        }
+
+        // render the food immediately - this only needs to be done once
+        do food.draw();
+        return;
+    }
+
+    method void updateSeeds() {
+        let seedX = seedX + seedY + Keyboard.keyPressed() + 1;
+        let seedY = (seedX - seedY + 1) / (Keyboard.keyPressed() + 1);
+        return;
+    }
+
+    method void print() {
+        do Output.printString("SeedX: ");
+        do Output.printInt(Global.blockX(seedX));
+        do Output.printString(" SeedY: ");
+        do Output.printInt(Global.blockY(seedY));
+        do Output.printString(" ");
+        do Output.println();
+        // do snake.print();
+        do food.print();
+        return;
+    }
+
+    method void dispose() {
+        do snake.dispose();
+        do food.dispose();
+        do Memory.deAlloc(this);
+        return;
+     }
+}

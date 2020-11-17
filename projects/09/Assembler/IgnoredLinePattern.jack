@@ -1,0 +1,6 @@
+class IgnoredLinePattern {
+    function int test(String line) {
+
+        return -1;
+    }
+}
