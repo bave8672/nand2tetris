@@ -1,0 +1,14 @@
+class Point {
+    field int x;
+    field int y;
+
+    constructor Point new(int x, int y) {
+        let x = x;
+        let y = y;
+        return this;
+    }
+
+    method void destroy() {
+        return;
+    }
+}

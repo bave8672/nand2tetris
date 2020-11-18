@@ -1,0 +1,30 @@
+class Main {
+    function void main() {
+        var List list;
+        var List l;
+
+        let list = List.new(65, null);
+        do list.print();
+        do Output.println();
+
+        let list = List.new(66, list);
+        do list.print();
+        do Output.println();
+
+        let list = List.new(67, list);
+        do list.print();
+        do Output.println();
+
+        let l = list.getNext();
+        let l = l.getNext();
+        do l.dispose();
+        do list.print();
+        do Output.println();
+
+        do list.dispose();
+        do list.print();
+        do Output.println();
+
+        return;
+    }
+}
