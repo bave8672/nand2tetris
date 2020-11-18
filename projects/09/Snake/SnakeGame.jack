@@ -31,8 +31,14 @@ class SnakeGame {
         do snake.move(Keyboard.keyPressed());
 
         // check for eat food
-        if (snake.intersects(food.getX(), food.getY())) {
+        if (snake.intersects(food.getX(), food.getY(), true)) {
             do onFoodEaten();
+        }
+
+        // check for snake collision
+        if (snake.intersects(snake.getHeadX(), snake.getHeadY(), false)) {
+            do Sys.wait(Global.FRAME_TIME() * 3);
+            do reset();
         }
 
         // draw
@@ -61,7 +67,7 @@ class SnakeGame {
             let food = Food.new(Global.blockX(seedX), Global.blockY(seedY));
         }
 
-        while (snake.intersects(food.getX(), food.getY())) {
+        while (snake.intersects(food.getX(), food.getY(), true)) {
             do updateSeeds();
             do food.setX(Global.blockX(seedX));
             do food.setY(Global.blockY(seedY));
@@ -81,6 +87,14 @@ class SnakeGame {
         return;
     }
 
+    method void reset() {
+        do Screen.clearScreen();
+        do snake.dispose();
+        let snake = Snake.new();
+        do placeFood();
+        return;
+    }
+
     method void print() {
         do Output.printString("SeedX: ");
         do Output.printInt(Global.blockX(seedX));
@@ -88,7 +102,7 @@ class SnakeGame {
         do Output.printInt(Global.blockY(seedY));
         do Output.printString(" ");
         do Output.println();
-        // do snake.print();
+        do snake.print();
         do food.print();
         return;
     }

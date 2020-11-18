@@ -1,6 +1,6 @@
 class Global {
-    function boolean DEBUG() { return true; }
-    function int FRAME_TIME() { return 200; }
+    function boolean DEBUG() { return false; }
+    function int FRAME_TIME() { return 100; }
     function int QUIT() { return 81; } // q
     function int RIGHT() { return 68; } // d
     function int UP() { return 87; } // w

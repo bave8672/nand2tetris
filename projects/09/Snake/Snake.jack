@@ -105,15 +105,11 @@ class Snake {
             let p = p.getNext();
             let len = len + 1;
         }
-
-        // dispose of paths not included in the body of the snake
-        // if (~(p = null)) {
-        //     do p.dispose();
-        // }
+        
         return;
     }
 
-    method boolean intersects(int px, int py) {
+    method boolean intersects(int px, int py, boolean includeHead) {
         var int x; // current x
         var int y; // current y
         var List p; // current path segment
@@ -124,7 +120,7 @@ class Snake {
         let p = path;
         let len = 0;
 
-        if ((x = px) & (y = py)) {
+        if (includeHead & (x = px) & (y = py)) {
             return true;
         }
 
