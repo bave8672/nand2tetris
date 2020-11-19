@@ -1,8 +1,11 @@
+import { Keyword } from "./keyword";
+import { TokenType } from "./token_type";
+
 export interface ITokeniser {
     hasMoreTokens(): Promise<boolean>;
     advance(): Promise<void>;
-    tokenType(): string; // TOKEN_TYPE
-    keyword(): string; // KEYWORD
-    symbol(): string;
-    intVal(): number;
+    tokenType(): Promise<TokenType>;
+    keyword(): Promise<Keyword>;
+    symbol(): Promise<string>;
+    intVal(): Promise<number>;
 }
