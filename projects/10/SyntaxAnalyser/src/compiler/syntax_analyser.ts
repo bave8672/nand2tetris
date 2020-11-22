@@ -1,7 +1,7 @@
-import { IteratorUtil } from "./iterator_util";
-import { MyTokeniser } from "./my_tokeniser";
-import { Parser } from "./parser";
-import { TokenWriter } from "./token_writer";
+import { Parser } from "../parser/parser";
+import { MyTokeniser } from "../tokeniser/my_tokeniser";
+import { TokenWriter } from "../tokeniser/token_writer";
+import { IteratorUtil } from "../util/iterator_util";
 
 export class SyntaxAnalyser {
     public constructor(

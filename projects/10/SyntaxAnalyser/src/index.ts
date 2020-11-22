@@ -1,4 +1,4 @@
-import { CompilerCli } from "./compiler_cli";
+import { CompilerCli } from "./compiler/compiler_cli";
 
 const cli = new CompilerCli();
 cli.main();

@@ -8,10 +8,10 @@
             "type": "node",
             "request": "launch",
             "name": "Jest",
-            "program": "${workspaceFolder}/projects/08/vm_translator/node_modules/jest/bin/jest.js",
+            "program": "${workspaceFolder}/projects/10/SyntaxAnalyser/node_modules/jest/bin/jest.js",
             "args": [
                 "--config",
-                "${workspaceFolder}/projects/08/vm_translator/jest.config.js",
+                "${workspaceFolder}/projects/10/SyntaxAnalyser/jest.config.js",
                 "--runInBand",
                 "--coverage=false"
             ],

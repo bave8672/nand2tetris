@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import { glob } from "glob";
-import { FileUtil } from "./file_util";
-import { StringUtil } from "./string_util";
+import { FileUtil } from "./util/file_util";
+import { StringUtil } from "./util/string_util";
 
 describe(`xml tests`, () => {
     beforeAll(() => {

@@ -1,5 +1,5 @@
 import xml from "xml";
-import { FileUtil } from "./file_util";
+import { FileUtil } from "../util/file_util";
 import { Token } from "./token";
 
 export class TokenWriter {

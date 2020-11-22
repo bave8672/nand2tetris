@@ -1,6 +1,6 @@
+import { StringUtil } from "../util/string_util";
 import { AbstractTokeniserStateMachine } from "./abstract_tokeniser_state_machine";
 import { EagerHigherOrderTokeniserStateMachine } from "./eager_higher_order_tokeniser_state_machine";
-import { StringUtil } from "./string_util";
 import { TokenType } from "./token_type";
 
 export class WhitespaceAgnosticTokeniserStateMachine<
