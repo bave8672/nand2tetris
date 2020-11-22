@@ -1,4 +1,4 @@
-export enum Symbol {
+export enum JackSymbol {
     LeftCurlyBracket = "{",
     RightCurlyBracket = "}",
     LeftBracket = "(",
@@ -16,4 +16,6 @@ export enum Symbol {
     VerticalBar = "|",
     LessThan = "<",
     GreaterThan = ">",
+    Equal = "=",
+    Tilde = "~",
 }

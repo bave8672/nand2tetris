@@ -8,4 +8,5 @@ export interface ITokeniser {
     keyword(): Promise<Keyword>;
     symbol(): Promise<string>;
     intVal(): Promise<number>;
+    stringVal(): Promise<string>;
 }

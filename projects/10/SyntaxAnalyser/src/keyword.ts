@@ -1,5 +1,5 @@
 export enum Keyword {
-    Class = "Class",
+    Class = "class",
     Constructor = "constructor",
     Function = "function",
     Method = "method",
@@ -15,7 +15,7 @@ export enum Keyword {
     Null = "null",
     This = "this",
     Let = "let",
-    Dio = "dio",
+    Do = "do",
     If = "if",
     Else = "else",
     While = "while",
