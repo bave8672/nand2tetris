@@ -3,9 +3,9 @@ import { JackSymbol } from "../tokeniser/symbol";
 import { keyword } from "./keyword";
 import { SUBROUTINE_CALL } from "./subroutine_call";
 import { symbol } from "./symbol";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const DO_STATEMENT: Syntax = {
+export const DO_STATEMENT: SyntaxDef = {
     name: "doStatement",
     type: SyntaxType.ExactlyOne,
     syntax: [

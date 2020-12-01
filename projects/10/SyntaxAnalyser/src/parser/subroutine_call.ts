@@ -5,10 +5,10 @@ import { optional } from "./optional";
 import { or } from "./or";
 import { SUBROUTINE_NAME } from "./subroutine_name";
 import { symbol } from "./symbol";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 import { VAR_NAME } from "./var_name";
 
-export const SUBROUTINE_CALL: Syntax = {
+export const SUBROUTINE_CALL: SyntaxDef = {
     name: "expressionList",
     type: SyntaxType.ExactlyOne,
     syntax: [

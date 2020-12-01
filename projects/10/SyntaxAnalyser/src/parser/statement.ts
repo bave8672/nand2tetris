@@ -2,10 +2,10 @@ import { DO_STATEMENT } from "./do_statement";
 import { IF_STATEMENT } from "./if_statement";
 import { LET_STATEMENT } from "./let_statement";
 import { RETURN_STATEMENT } from "./return_statement";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 import { WHILE_STATEMENT } from "./while_statement";
 
-export const STATEMENT: Syntax = {
+export const STATEMENT: SyntaxDef = {
     name: "statement",
     type: SyntaxType.Or,
     syntax: [

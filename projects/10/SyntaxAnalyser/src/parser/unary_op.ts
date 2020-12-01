@@ -1,8 +1,8 @@
 import { JackSymbol } from "../tokeniser/symbol";
 import { symbol } from "./symbol";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const UNARY_OP: Syntax = {
+export const UNARY_OP: SyntaxDef = {
     name: "unaryOp",
     type: SyntaxType.Or,
     syntax: [symbol(JackSymbol.Minus), symbol(JackSymbol.Tilde)],

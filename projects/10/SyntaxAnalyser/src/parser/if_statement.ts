@@ -4,9 +4,9 @@ import { EXPRESSION } from "./expression";
 import { keyword } from "./keyword";
 import { optional } from "./optional";
 import { symbol } from "./symbol";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const IF_STATEMENT: Syntax = {
+export const IF_STATEMENT: SyntaxDef = {
     name: "ifStatement",
     type: SyntaxType.ExactlyOne,
     syntax: [

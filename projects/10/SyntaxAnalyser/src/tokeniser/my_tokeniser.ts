@@ -1,6 +1,6 @@
-import { ErrorUtil } from "./error_util";
+import { ErrorUtil } from "../util/error_util";
+import { LineCount } from "../util/line_count";
 import { JackTokeniserStateMachine } from "./jack_tokeniser_state_machine";
-import { LineCount } from "./line_count";
 import { Token } from "./token";
 import { TokenType } from "./token_type";
 

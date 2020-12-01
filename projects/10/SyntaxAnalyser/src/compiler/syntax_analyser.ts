@@ -1,3 +1,4 @@
+import { CLASS } from "../parser/class";
 import { Parser } from "../parser/parser";
 import { MyTokeniser } from "../tokeniser/my_tokeniser";
 import { TokenWriter } from "../tokeniser/token_writer";
@@ -18,7 +19,7 @@ export class SyntaxAnalyser {
         const [tokenWriteResult, syntax] = IteratorUtil.multiplex(
             tokens,
             (tokens) => this.tokenWriter.writeTokens(tokens, path),
-            this.parser.parseTokens
+            (tokens) => this.parser.parseTokens(tokens, CLASS)
         );
         await tokenWriteResult;
     }

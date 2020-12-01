@@ -1,7 +1,7 @@
 import { TokenType } from "../tokeniser/token_type";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const INTEGER_CONSTANT: Syntax = {
+export const INTEGER_CONSTANT: SyntaxDef = {
     name: "integerConstant",
     type: SyntaxType.ExactlyOne,
     syntax: [{ type: TokenType.IntegerConstant, value: "*" }],

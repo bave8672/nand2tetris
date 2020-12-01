@@ -1,7 +1,7 @@
 import { STATEMENT } from "./statement";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const STATEMENTS: Syntax = {
+export const STATEMENTS: SyntaxDef = {
     name: "statement",
     type: SyntaxType.ZeroOrMore,
     syntax: [STATEMENT],

@@ -1,6 +1,6 @@
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export function zeroOrMore(...syntax: Syntax["syntax"]): Syntax {
+export function zeroOrMore(...syntax: Array<SyntaxDef>): SyntaxDef {
     return {
         type: SyntaxType.ZeroOrMore,
         syntax,

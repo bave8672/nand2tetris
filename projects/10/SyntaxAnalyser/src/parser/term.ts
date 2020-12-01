@@ -5,11 +5,11 @@ import { KEYWORD_CONSTANT } from "./keyword_constant";
 import { STRING_CONSTANT } from "./string_constant";
 import { SUBROUTINE_CALL } from "./subroutine_call";
 import { symbol } from "./symbol";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 import { UNARY_OP } from "./unary_op";
 import { VAR_NAME } from "./var_name";
 
-export const TERM: Syntax = {
+export const TERM: SyntaxDef = {
     name: "term",
     type: SyntaxType.Or,
     syntax: [

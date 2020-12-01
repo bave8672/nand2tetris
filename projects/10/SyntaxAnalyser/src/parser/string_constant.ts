@@ -1,7 +1,7 @@
 import { TokenType } from "../tokeniser/token_type";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const STRING_CONSTANT: Syntax = {
+export const STRING_CONSTANT: SyntaxDef = {
     name: "stringConstant",
     type: SyntaxType.ExactlyOne,
     syntax: [{ type: TokenType.StringConstant, value: "*" }],

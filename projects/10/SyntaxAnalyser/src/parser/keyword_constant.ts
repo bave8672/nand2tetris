@@ -1,8 +1,8 @@
 import { Keyword } from "../tokeniser/keyword";
 import { TokenType } from "../tokeniser/token_type";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const KEYWORD_CONSTANT: Syntax = {
+export const KEYWORD_CONSTANT: SyntaxDef = {
     name: "keywordConstant",
     type: SyntaxType.Or,
     syntax: [

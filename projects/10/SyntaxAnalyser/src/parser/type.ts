@@ -1,9 +1,9 @@
 import { Keyword } from "../tokeniser/keyword";
 import { CLASS_NAME } from "./class_name";
 import { keyword } from "./keyword";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const TYPE: Syntax = {
+export const TYPE: SyntaxDef = {
     name: "type",
     type: SyntaxType.Or,
     syntax: [

@@ -1,7 +1,7 @@
 import { IDENTIFIER } from "./identifier";
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export const VAR_NAME: Syntax = {
+export const VAR_NAME: SyntaxDef = {
     name: "varName",
     type: SyntaxType.ExactlyOne,
     syntax: [IDENTIFIER],

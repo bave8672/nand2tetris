@@ -1,6 +1,6 @@
-import { Syntax, SyntaxType } from "./syntax";
+import { SyntaxDef, SyntaxType } from "./syntax";
 
-export function or(...syntax: Syntax["syntax"]): Syntax {
+export function or(...syntax: SyntaxDef[]): SyntaxDef {
     return {
         type: SyntaxType.Or,
         syntax,
